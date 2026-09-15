@@ -1,17 +1,19 @@
 # Copyright 2026 Xinzhi
 # SPDX-License-Identifier: Apache-2.0
 
-"""Run Go2 with CHAMP odometry and a single publisher for each TF edge."""
+"""Run Go2 with measured simulation odometry and ROS joint controllers."""
 
 import os
+import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, LaunchConfiguration, PythonExpression
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
+import xacro
 
 
 def generate_launch_description():
@@ -21,7 +23,17 @@ def generate_launch_description():
     description_dir = get_package_share_directory('unitree_go2_description')
     model = os.path.join(description_dir, 'urdf', 'unitree_go2_robot.xacro')
     clock = {'use_sim_time': LaunchConfiguration('use_sim_time')}
-    urdf = ParameterValue(Command(['xacro ', model]), value_type=str)
+    # Enable measured height/tilt without changing the upstream model files.
+    robot = ET.fromstring(xacro.process_file(model).toxml())
+    odometry_plugin = robot.find(
+        ".//plugin[@name='gz::sim::systems::OdometryPublisher']")
+    if odometry_plugin is None:
+        raise RuntimeError('The Go2 model must contain a Gazebo OdometryPublisher')
+    dimensions = odometry_plugin.find('dimensions')
+    if dimensions is None:
+        dimensions = ET.SubElement(odometry_plugin, 'dimensions')
+    dimensions.text = '3'
+    urdf = ParameterValue(ET.tostring(robot, encoding='unicode'), value_type=str)
     configs = [
         os.path.join(sim_dir, 'config', folder, folder + '.yaml')
         for folder in ('joints', 'links', 'gait')
@@ -36,6 +48,10 @@ def generate_launch_description():
         DeclareLaunchArgument(name, default_value=value)
         for name, value in defaults.items()
     ]
+    actions.append(DeclareLaunchArgument(
+        'ground_height',
+        default_value=PythonExpression([LaunchConfiguration('world_init_z'), ' - 0.375']),
+        description='World floor z; defaults to spawn z minus 0.375 m'))
     actions.extend([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(
@@ -66,36 +82,27 @@ def generate_launch_description():
         Node(
             package='champ_base', executable='quadruped_controller_node', output='screen',
             parameters=[clock, *configs, {
-                'urdf': urdf, 'gazebo': True, 'publish_joint_states': True,
+                'urdf': urdf, 'gazebo': True, 'publish_joint_states': False,
                 'publish_joint_control': True, 'publish_foot_contacts': False,
                 'joint_controller_topic': 'joint_group_effort_controller/joint_trajectory',
-                'hardware_connected': False, 'close_loop_odom': True,
+                'hardware_connected': False,
             }],
             remappings=[('/cmd_vel/smooth', '/cmd_vel')]),
+        # No foot-contact sensors exist in this model, so CHAMP leg odometry
+        # cannot update. Use Gazebo measurements for simulation navigation.
         Node(
-            package='champ_base', executable='state_estimation_node', output='screen',
-            parameters=[clock, *configs, {'urdf': urdf, 'orientation_from_imu': True}]),
-        # These EKFs own odom -> base_footprint -> base_link. SLAM owns map -> odom.
+            package='vlm_go2_control', executable='simulation_odometry',
+            name='simulation_odometry', output='screen',
+            parameters=[os.path.join(package_dir, 'params', 'go2_odom.yaml'), clock, {
+                'ground_height': ParameterValue(
+                    LaunchConfiguration('ground_height'), value_type=float),
+            }]),
+        # The spawner waits for controller_manager itself. Loading immediately
+        # avoids leaving the robot uncontrolled for a fixed 20 seconds.
         Node(
-            package='robot_localization', executable='ekf_node',
-            name='base_to_footprint_ekf', output='screen',
-            parameters=[
-                os.path.join(get_package_share_directory('champ_base'),
-                             'config', 'ekf', 'base_to_footprint.yaml'),
-                clock, {'base_link_frame': 'base_link'}],
-            remappings=[('odometry/filtered', 'odom/local')]),
-        Node(
-            package='robot_localization', executable='ekf_node',
-            name='footprint_to_odom_ekf', output='screen',
-            parameters=[os.path.join(package_dir, 'params', 'go2_odom.yaml'), clock],
-            remappings=[('odometry/filtered', 'odom')]),
-        # Retain the upstream startup delay while Gazebo creates ros2_control.
-        TimerAction(period=20.0, actions=[
-            Node(
-                package='controller_manager', executable='spawner', output='screen',
-                arguments=['joint_states_controller', 'joint_group_effort_controller',
-                           '--controller-manager-timeout', '120'],
-                parameters=[clock]),
-        ]),
+            package='controller_manager', executable='spawner', output='screen',
+            arguments=['joint_states_controller', 'joint_group_effort_controller',
+                       '--controller-manager-timeout', '120'],
+            parameters=[clock]),
     ])
     return LaunchDescription(actions)

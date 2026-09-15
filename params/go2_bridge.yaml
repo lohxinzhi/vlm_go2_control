@@ -1,4 +1,4 @@
-# Gazebo ground truth is kept separate from CHAMP's filtered /odom.
+# Full 3D Gazebo odometry feeds the package's planar odometry/TF adapter.
 - ros_topic_name: /clock
   gz_topic_name: /clock
   ros_type_name: rosgraph_msgs/msg/Clock
@@ -35,8 +35,5 @@
   ros_type_name: sensor_msgs/msg/Image
   gz_type_name: gz.msgs.Image
   direction: GZ_TO_ROS
-- ros_topic_name: /joint_group_effort_controller/joint_trajectory
-  gz_topic_name: /joint_group_effort_controller/joint_trajectory
-  ros_type_name: trajectory_msgs/msg/JointTrajectory
-  gz_type_name: gz.msgs.JointTrajectory
-  direction: ROS_TO_GZ
+# JointTrajectory commands go directly to the ROS joint trajectory controller.
+# gz_ros2_control writes its effort commands into Gazebo; no command bridge is needed.
