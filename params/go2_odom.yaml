@@ -1,0 +1,21 @@
+footprint_to_odom_ekf:
+  ros__parameters:
+    use_sim_time: true
+    base_link_frame: base_footprint
+    odom_frame: odom
+    world_frame: odom
+    publish_tf: true
+    frequency: 50.0
+    two_d_mode: true
+    odom0: odom/raw
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true, true, false,
+                   false, false, true,
+                   false, false, false]
+    imu0: imu/data
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, true,
+                  false, false, false]
