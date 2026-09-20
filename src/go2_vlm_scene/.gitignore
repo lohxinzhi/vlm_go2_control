@@ -1,0 +1,25 @@
+__pycache__/
+.pytest_cache/
+*.egg-info/
+# Local credentials must never be committed.
+.env
+.env.*
+!.env.example
+credentials.env
+credentials.env.*
+secrets.env
+secrets.env.*
+*.pem
+*.key
+.secrets/
+secrets/
+
+# Also protect standalone package checkouts.
+build/
+install/
+log/
+.runtime/
+.ros/
+*.py[cod]
+.coverage
+htmlcov/

@@ -1,0 +1,12 @@
+diff --git a/unitree_go2_sim/package.xml b/unitree_go2_sim/package.xml
+index fb34919..0156680 100644
+--- a/unitree_go2_sim/package.xml
++++ b/unitree_go2_sim/package.xml
+@@ -10,6 +10,6 @@
+   <buildtool_depend>ament_cmake</buildtool_depend>
+   <build_depend>launch_ros</build_depend>
+-  <exec_depend>unitree_applications</exec_depend>
++  <exec_depend>unitree_application</exec_depend>
+   <exec_depend>ros_gz_sim</exec_depend>
+   <exec_depend>ros_gz_bridge</exec_depend>
+   <exec_depend>gz_ros2_control</exec_depend>

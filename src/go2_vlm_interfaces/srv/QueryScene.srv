@@ -1,0 +1,21 @@
+# Empty mode is treated as describe. Supported modes: describe, vqa.
+string mode
+string question
+# Empty uses the configured default; otherwise openai or gemini.
+string provider
+# With refresh_frame=false, a nonempty ID resolves a retained scene.
+# Empty scene_id always captures the latest frame.
+string scene_id
+bool refresh_frame
+---
+bool success
+string answer
+string scene_id
+builtin_interfaces/Time image_stamp
+string frame_id
+string provider
+string model
+float64 latency_sec
+# Empty when unavailable; usage metadata is a JSON object.
+string usage_json
+string error_message

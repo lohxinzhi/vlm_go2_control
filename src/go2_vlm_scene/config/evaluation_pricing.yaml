@@ -1,0 +1,26 @@
+version: pricing-v1
+# No prices asserted. Human verification of BOTH rates and usage rules is required.
+providers:
+  openai:
+    model: gpt-4o-mini
+    currency: USD
+    input_price_per_million: null
+    output_price_per_million: null
+    date_checked: null
+    source: null
+    manually_verified: false
+    usage_rule_verified: false
+    input_usage_field: prompt_tokens
+    output_usage_rule: completion_tokens
+  gemini:
+    model: gemini-3.8-flash
+    currency: USD
+    input_price_per_million: null
+    output_price_per_million: null
+    date_checked: null
+    source: null
+    manually_verified: false
+    usage_rule_verified: false
+    input_usage_field: prompt_tokens
+    # Choose completion_tokens OR total_minus_input only after verifying billing.
+    output_usage_rule: null

@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <model name="target_purple_cylinder_kitchen">
+    <static>true</static>
+    <link name="target">
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>.15</radius>
+            <length>.35</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>.15</radius>
+            <length>.35</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>.65 0 1 1</ambient>
+          <diffuse>.65 0 1 1</diffuse>
+          <specular>0 0 0 1</specular>
+          <pbr>
+            <metal>
+              <metalness>0</metalness>
+              <roughness>1</roughness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

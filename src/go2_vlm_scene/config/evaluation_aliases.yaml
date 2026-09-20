@@ -1,0 +1,15 @@
+version: target-aliases-v1
+# Canonical phrases are colour + shape. Changes must be frozen before a run.
+colors: [green, red, blue, yellow, purple, orange, pink, white, black, brown, grey]
+shapes:
+  cube: cube
+  cylinder: cylinder
+  triangular prism: triangular_prism
+  sphere: sphere
+  cone: cone
+aliases:
+  green block: {color: green, shape: cube, approved: true}
+  green box: {color: green, shape: cube, approved: true}
+  red triangular object: {color: red, shape: triangular_prism, approved: true}
+  blue tube: {color: blue, shape: cylinder, approved: false}
+# Unknown/negated/uncertain/count-ambiguous statements go to manual review.

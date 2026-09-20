@@ -1,0 +1,9 @@
+# Always freeze the latest valid frame; optionally also save it to disk.
+bool save_image
+---
+bool success
+string scene_id
+builtin_interfaces/Time image_stamp
+string frame_id
+string saved_path
+string error_message

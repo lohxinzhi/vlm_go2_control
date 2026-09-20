@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
@@ -97,12 +97,19 @@ def generate_launch_description():
                 'ground_height': ParameterValue(
                     LaunchConfiguration('ground_height'), value_type=float),
             }]),
-        # The spawner waits for controller_manager itself. Loading immediately
-        # avoids leaving the robot uncontrolled for a fixed 20 seconds.
-        Node(
-            package='controller_manager', executable='spawner', output='screen',
-            arguments=['joint_states_controller', 'joint_group_effort_controller',
-                       '--controller-manager-timeout', '120'],
-            parameters=[clock]),
+        # Match the reference's wall-clock delays from launch startup.
+        TimerAction(period=20.0, actions=[
+            Node(
+                package='controller_manager', executable='spawner', output='screen',
+                arguments=['joint_states_controller', '--controller-manager-timeout', '120'],
+                parameters=[clock]),
+        ]),
+        TimerAction(period=30.0, actions=[
+            Node(
+                package='controller_manager', executable='spawner', output='screen',
+                arguments=['joint_group_effort_controller',
+                           '--controller-manager-timeout', '120'],
+                parameters=[clock]),
+        ]),
     ])
     return LaunchDescription(actions)
