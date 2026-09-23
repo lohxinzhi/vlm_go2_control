@@ -11,6 +11,7 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
@@ -20,8 +21,8 @@ def generate_launch_description():
     description_dir = get_package_share_directory('unitree_go2_description')
     world_dir = get_package_share_directory('go2_house_world')
     defaults = {
-        'slam': ('true', 'Run online mapping; false uses the supplied map'),
-        'map': (os.path.join(nav2_dir, 'maps', 'depot.yaml'), 'Map for slam:=false'),
+        'slam': ('false', 'Run online mapping; false uses the supplied map'),
+        'map': (os.path.join(package_dir, 'maps', 'bto_1.yaml'), 'Map for slam:=false'),
         'use_sim_time': ('true', 'Use the Gazebo clock'),
         'params_file': (
             os.path.join(package_dir, 'params', 'nav2_go2_params.yaml'),
@@ -42,6 +43,9 @@ def generate_launch_description():
         'world_init_y': ('4.0', 'Spawn y'),
         'world_init_z': ('0.575', 'Spawn z'),
         'world_init_heading': ('0.0', 'Spawn yaw in radians'),
+        'initial_pose_x': ('-0.5', 'Initial pose x in map frame'),
+        'initial_pose_y': ('0.0', 'Initial pose y in map frame'),
+        'initial_pose_a': ('-0.02', 'Initial pose yaw in radians'),
     }
     actions = [
         DeclareLaunchArgument(name, default_value=value, description=description)
@@ -80,5 +84,16 @@ def generate_launch_description():
             'use_sim_time': LaunchConfiguration('use_sim_time'),
             'rviz_config': LaunchConfiguration('rviz_config_file'),
         }.items(),
+    ))
+    actions.append(Node(
+        package='vlm_go2_control',
+        executable='set_initial_pose',
+        name='set_initial_pose',
+        parameters=[{
+            'x': LaunchConfiguration('initial_pose_x'),
+            'y': LaunchConfiguration('initial_pose_y'),
+            'heading': LaunchConfiguration('initial_pose_a'),
+        }],
+        output='screen',
     ))
     return LaunchDescription(actions)
