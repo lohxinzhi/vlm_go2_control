@@ -99,35 +99,57 @@
       <self_collide>false</self_collide>
     </model>
 
-    <include>
-      <uri>model://greenquartz_bto</uri>
-      <pose>0 0 0 0 0 0</pose>
-    </include>
+    <model name="greenquartz_bto">
+      <static>true</static>
+      <pose>0 0 -0.02 0 0 0</pose>
+      <link name="apartment">
+        <!--
+          Uniform house mesh scale. The source model uses 0.01, so 0.02 is 2x.
+          Change all three matching values in both scale elements together.
+        -->
+        <visual name="fusion_visual">
+          <geometry>
+            <mesh>
+              <uri>model://greenquartz_bto/meshes/GreenQuartz_BTO.obj</uri>
+              <scale>0.02 0.02 0.02</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name="fusion_collision">
+          <geometry>
+            <mesh>
+              <uri>model://greenquartz_bto/meshes/GreenQuartz_BTO.obj</uri>
+              <scale>0.02 0.02 0.02</scale>
+            </mesh>
+          </geometry>
+        </collision>
+      </link>
+    </model>
 
     <include>
       <uri>model://target_green_cube_living_room</uri>
       <name>target_green_cube_living_room</name>
-      <pose>3.1 6.1 0.15 0 0 0</pose>
+      <pose>6.2 12.2 0.15 0 0 0</pose>
     </include>
     <include>
       <uri>model://target_red_triangle_bedroom1</uri>
       <name>target_red_triangle_bedroom1</name>
-      <pose>7 5.8 0.175 0 0 0</pose>
+      <pose>14 11.6 0.175 0 0 0</pose>
     </include>
     <include>
       <uri>model://target_blue_cylinder_bedroom2</uri>
       <name>target_blue_cylinder_bedroom2</name>
-      <pose>10 5.8 0.175 0 0 0</pose>
+      <pose>20 11.6 0.175 0 0 0</pose>
     </include>
     <include>
       <uri>model://target_yellow_cube_master_bedroom</uri>
       <name>target_yellow_cube_master_bedroom</name>
-      <pose>13.2 5.8 0.15 0 0 0</pose>
+      <pose>26.4 11.6 0.15 0 0 0</pose>
     </include>
     <include>
       <uri>model://target_purple_cylinder_kitchen</uri>
       <name>target_purple_cylinder_kitchen</name>
-      <pose>4.7 -0.5 0.175 0 0 0</pose>
+      <pose>9.4 -1.0 0.175 0 0 0</pose>
     </include>
   </world>
 </sdf>
