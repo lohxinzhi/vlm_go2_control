@@ -18,6 +18,7 @@ def generate_launch_description():
     package_dir = get_package_share_directory('vlm_go2_control')
     nav2_dir = get_package_share_directory('nav2_bringup')
     description_dir = get_package_share_directory('unitree_go2_description')
+    world_dir = get_package_share_directory('go2_house_world')
     defaults = {
         'slam': ('true', 'Run online mapping; false uses the supplied map'),
         'map': (os.path.join(nav2_dir, 'maps', 'depot.yaml'), 'Map for slam:=false'),
@@ -33,13 +34,13 @@ def generate_launch_description():
             os.path.join(package_dir, 'rviz', 'nav2_default_view.rviz'),
             'RViz configuration'),
         'world': (
-            os.path.join(description_dir, 'worlds', 'TIbuilding.sdf'),
+            os.path.join(world_dir, 'worlds', 'greenquartz_bto.sdf'),
             'Gazebo world file'),
         'gui': ('true', 'Start the Gazebo GUI'),
         'robot_name': ('go2', 'Gazebo entity name'),
-        'world_init_x': ('0.0', 'Spawn x'),
-        'world_init_y': ('0.0', 'Spawn y'),
-        'world_init_z': ('4.375', 'Spawn z; use 0.375 for default.sdf'),
+        'world_init_x': ('4.0', 'Spawn x'),
+        'world_init_y': ('4.0', 'Spawn y'),
+        'world_init_z': ('0.575', 'Spawn z'),
         'world_init_heading': ('0.0', 'Spawn yaw in radians'),
     }
     actions = [

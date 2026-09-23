@@ -20,6 +20,7 @@ def generate_launch_description():
     """Reuse upstream models and controllers with navigation-compatible wiring."""
     package_dir = get_package_share_directory('vlm_go2_control')
     sim_dir = get_package_share_directory('unitree_go2_sim')
+    world_dir = get_package_share_directory('go2_house_world')
     description_dir = get_package_share_directory('unitree_go2_description')
     model = os.path.join(description_dir, 'urdf', 'unitree_go2_robot.xacro')
     clock = {'use_sim_time': LaunchConfiguration('use_sim_time')}
@@ -40,7 +41,8 @@ def generate_launch_description():
     ]
     defaults = {
         'use_sim_time': 'true', 'gui': 'true', 'robot_name': 'go2',
-        'world': os.path.join(description_dir, 'worlds', 'TIbuilding.sdf'),
+        # 'world': os.path.join(description_dir, 'worlds', 'TIbuilding.sdf'),
+        'world': os.path.join(world_dir, 'worlds', 'greenquartz_bto.sdf'),
         'world_init_x': '0.0', 'world_init_y': '0.0',
         'world_init_z': '4.375', 'world_init_heading': '0.0',
     }
