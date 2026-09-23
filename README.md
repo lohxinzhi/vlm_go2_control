@@ -1,15 +1,42 @@
 # Go2 simulation with Nav2 and SLAM
 
-Build and launch from the workspace:
+This repository is a ROS 2 workspace with four packages under `src/`:
+`vlm_go2_control`, `go2_house_world`, `go2_vlm_interfaces`, and `go2_vlm_scene`.
+For a fresh teammate installation, follow [Dependency setup](docs/DEPENDENCY_SETUP.md).
+It places the pinned Go2/CHAMP source beside this repository in an enclosing
+workspace and applies the audited dependency-name fix. The commands below assume
+external dependencies are already available; fresh setups should build from the
+enclosing workspace as documented there.
+
+Run the following from the repository root (where this README lives):
 
 ```bash
 source /opt/ros/jazzy/setup.bash
-colcon build --symlink-install --packages-select vlm_go2_control
+colcon build --symlink-install
 source install/setup.bash
+ros2 launch go2_house_world apartment_go2.launch.py
+```
+
+Task 3 setup, API-disabled launch, and offline tests are documented in
+[src/go2_vlm_scene/README.md](src/go2_vlm_scene/README.md). The existing
+package name, launch files, and navigation interfaces are unchanged.
+
+The shared project default is the GreenQuartz apartment with five coloured
+targets and the Go2 living-room spawn. See
+[src/go2_house_world/README.md](src/go2_house_world/README.md) for assets,
+dependencies, spawn coordinates, and portable launch options. This apartment
+entry point starts the existing controllers/camera stack without Nav2 or motion
+commands. All existing teammate launch files remain unchanged.
+
+## Existing Nav2/SLAM launch
+
+The original navigation entry point remains available:
+
+```bash
 ros2 launch vlm_go2_control go2_sim_nav2_launch.py
 ```
 
-The default is online SLAM in TIbuilding.sdf, with Gazebo and RViz.
+Its default is online SLAM in TIbuilding.sdf, with Gazebo and RViz.
 Wait for the controllers and Nav2 to activate, then use RViz's Nav2 Goal
 tool to navigate through mapped free space. Mapping continues while moving;
 this launch does not perform autonomous frontier exploration.

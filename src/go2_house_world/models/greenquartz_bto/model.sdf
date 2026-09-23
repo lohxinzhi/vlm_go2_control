@@ -1,0 +1,2009 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <model name="greenquartz_bto">
+    <static>true</static>
+    <pose>0 0 -0.01 0 0 0</pose>
+    <link name="apartment">
+      <visual name="fusion_visual">
+        <geometry>
+          <mesh>
+            <uri>model://greenquartz_bto/meshes/GreenQuartz_BTO.obj</uri>
+            <scale>0.01 0.01 0.01</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="planar_0000">
+        <pose>-0.039840 0.600000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.200000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0001">
+        <pose>-0.039840 7.325000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.050000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0002">
+        <pose>0.130160 4.000000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 5.600000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0003">
+        <pose>0.350160 4.000000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 5.600000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0004">
+        <pose>0.500160 0.775000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.850000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0005">
+        <pose>0.500160 7.125000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.650000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0006">
+        <pose>0.500160 7.525000 1.325000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.950000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0007">
+        <pose>0.500160 7.725000 1.150000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0008">
+        <pose>0.925160 0.175000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.350000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0009">
+        <pose>2.201910 0.175000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.350000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0010">
+        <pose>2.401910 0.225000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0011">
+        <pose>3.002350 7.525000 1.325000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.950000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0012">
+        <pose>3.002350 7.725000 1.150000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0013">
+        <pose>3.521910 -0.575000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 2.850000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0014">
+        <pose>3.731910 -1.500000 1.750000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.600000 1.700000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0015">
+        <pose>3.731910 -0.175000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 2.050000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0016">
+        <pose>4.042350 7.525000 1.325000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.950000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0017">
+        <pose>4.042350 7.725000 1.150000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0018">
+        <pose>5.250910 7.525000 1.325000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.950000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0019">
+        <pose>5.250910 7.725000 1.150000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0020">
+        <pose>5.771910 0.450000 0.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.600000 0.900000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0021">
+        <pose>5.771910 1.775000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 2.050000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0022">
+        <pose>5.780000 5.675000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 3.550000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0023">
+        <pose>5.880000 5.725000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 3.450000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0024">
+        <pose>6.056910 1.850000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.400000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0025">
+        <pose>6.290910 7.525000 1.675000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0026">
+        <pose>6.290910 7.725000 1.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0027">
+        <pose>6.636910 2.675000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0028">
+        <pose>7.431340 2.675000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0029">
+        <pose>7.630000 3.950000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0030">
+        <pose>7.661910 0.675000 1.750000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.700000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0031">
+        <pose>8.008580 1.850000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.400000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0032">
+        <pose>8.246850 7.525000 1.675000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0033">
+        <pose>8.246850 7.725000 1.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0034">
+        <pose>8.548580 1.825000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.950000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0035">
+        <pose>8.620000 3.950000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0036">
+        <pose>8.621900 2.750000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0037">
+        <pose>8.660000 5.725000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 3.450000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0038">
+        <pose>8.760000 5.725000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 3.450000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0039">
+        <pose>8.820000 3.950000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0040">
+        <pose>9.163560 -1.500000 1.000000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.600000 0.200000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0041">
+        <pose>9.163560 -0.525000 0.550000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.350000 1.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0042">
+        <pose>9.163560 -0.600000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 2.400000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0043">
+        <pose>9.163560 0.375000 1.000000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.450000 0.200000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0044">
+        <pose>9.286850 7.525000 1.675000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0045">
+        <pose>9.286850 7.725000 1.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0046">
+        <pose>9.321910 -1.900000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.200000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0047">
+        <pose>9.321910 -0.600000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 2.400000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0048">
+        <pose>9.321910 -0.600000 0.550000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 2.400000 1.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0049">
+        <pose>9.321910 0.725000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0050">
+        <pose>9.625000 2.750000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0051">
+        <pose>9.815720 3.950000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0052">
+        <pose>9.962660 0.925000 2.050000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 0.500000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0053">
+        <pose>10.567450 0.925000 2.050000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 0.500000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0054">
+        <pose>10.615310 1.850000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.700000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0055">
+        <pose>10.720310 1.850000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.700000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0056">
+        <pose>11.127630 7.525000 1.675000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0057">
+        <pose>11.127630 7.725000 1.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0058">
+        <pose>11.189250 2.750000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0059">
+        <pose>11.301610 0.925000 1.600000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.200000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0060">
+        <pose>11.535720 5.725000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 3.450000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0061">
+        <pose>11.635720 5.675000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 3.550000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0062">
+        <pose>12.100000 2.750000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.100000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0063">
+        <pose>12.111070 0.925000 1.600000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.200000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0064">
+        <pose>12.167630 7.525000 1.675000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0065">
+        <pose>12.167630 7.725000 1.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0066">
+        <pose>12.980890 1.850000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.700000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0067">
+        <pose>13.250890 1.825000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 1.950000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0068">
+        <pose>14.575750 5.125000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 4.650000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0069">
+        <pose>14.575750 7.525000 1.675000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.150000 1.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0070">
+        <pose>14.575750 7.725000 1.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 0.250000 2.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0071">
+        <pose>14.845750 5.200000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.010000 5.300000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0072">
+        <pose>6.400000 -2.018000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>5.800000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0073">
+        <pose>6.450000 -1.798000 1.750000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>5.400000 0.010000 1.700000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0074">
+        <pose>9.225000 -1.798000 1.725000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 0.010000 1.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0075">
+        <pose>6.450000 -1.198000 0.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>5.400000 0.010000 0.900000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0076">
+        <pose>0.450000 0.000000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.000000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0077">
+        <pose>2.850000 0.000000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.300000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0078">
+        <pose>2.950000 0.100000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.100000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0079">
+        <pose>7.450000 0.150000 0.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>3.400000 0.010000 0.900000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0080">
+        <pose>0.725000 0.340000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.450000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0081">
+        <pose>2.300000 0.340000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0082">
+        <pose>8.400000 0.592000 1.750000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.500000 0.010000 1.700000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0083">
+        <pose>9.225000 0.592000 1.725000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 0.010000 1.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0084">
+        <pose>6.700000 0.750000 1.750000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.900000 0.010000 1.700000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0085">
+        <pose>3.625000 0.852000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.250000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0086">
+        <pose>7.850000 0.852000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>4.200000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0087">
+        <pose>10.250000 0.852000 2.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.010000 0.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0088">
+        <pose>10.250000 0.852000 0.900000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.010000 1.800000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0089">
+        <pose>10.925000 0.852000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.750000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0090">
+        <pose>11.700000 0.852000 2.400000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.800000 0.010000 0.400000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0091">
+        <pose>11.700000 0.852000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.800000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0092">
+        <pose>12.675000 0.852000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.150000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0093">
+        <pose>9.250000 0.992000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.400000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0094">
+        <pose>10.250000 0.992000 2.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.010000 0.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0095">
+        <pose>10.250000 0.992000 0.900000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.010000 1.800000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0096">
+        <pose>10.575000 0.992000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0097">
+        <pose>11.000000 0.992000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0098">
+        <pose>11.700000 0.992000 2.400000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.800000 0.010000 0.400000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0099">
+        <pose>11.700000 0.992000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.800000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0100">
+        <pose>12.550000 0.992000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.900000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0101">
+        <pose>7.025000 1.127000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.950000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0102">
+        <pose>0.050000 1.200000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0103">
+        <pose>0.425000 1.200000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0104">
+        <pose>14.050000 2.565000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.600000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0105">
+        <pose>6.350000 2.568430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0106">
+        <pose>7.725000 2.568430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.550000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0107">
+        <pose>8.575000 2.699430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0108">
+        <pose>10.100000 2.699430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.000000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0109">
+        <pose>10.950000 2.699430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.500000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0110">
+        <pose>12.550000 2.704430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.900000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0111">
+        <pose>6.200000 2.824430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.900000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0112">
+        <pose>8.025000 2.824430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.150000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0113">
+        <pose>10.400000 2.824430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.600000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0114">
+        <pose>13.400000 2.824430 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.600000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0115">
+        <pose>6.725000 3.920000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0116">
+        <pose>8.700000 3.920000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0117">
+        <pose>10.725000 3.920000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0118">
+        <pose>6.775000 4.020000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.750000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0119">
+        <pose>8.625000 4.020000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0120">
+        <pose>8.775000 4.020000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0121">
+        <pose>10.675000 4.020000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.750000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0122">
+        <pose>0.050000 6.815000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0123">
+        <pose>0.425000 6.815000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0124">
+        <pose>1.750000 7.470000 2.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.500000 0.010000 0.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0125">
+        <pose>1.750000 7.470000 0.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.500000 0.010000 0.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0126">
+        <pose>3.525000 7.470000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0127">
+        <pose>4.650000 7.470000 2.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.200000 0.010000 0.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0128">
+        <pose>4.650000 7.470000 0.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.200000 0.010000 0.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0129">
+        <pose>5.525000 7.470000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.550000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0130">
+        <pose>6.100000 7.470000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.400000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0131">
+        <pose>7.275000 7.470000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.950000 0.010000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0132">
+        <pose>7.275000 7.470000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.950000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0133">
+        <pose>8.450000 7.470000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.400000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0134">
+        <pose>9.025000 7.470000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.550000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0135">
+        <pose>10.225000 7.470000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.010000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0136">
+        <pose>10.225000 7.470000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0137">
+        <pose>11.350000 7.470000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.400000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0138">
+        <pose>11.900000 7.470000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.500000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0139">
+        <pose>13.375000 7.470000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.450000 0.010000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0140">
+        <pose>13.375000 7.470000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.450000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0141">
+        <pose>1.750000 7.620000 0.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.500000 0.010000 0.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0142">
+        <pose>4.650000 7.620000 0.175000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.200000 0.010000 0.350000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0143">
+        <pose>7.275000 7.620000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.950000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0144">
+        <pose>10.225000 7.620000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0145">
+        <pose>13.375000 7.620000 0.500000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.450000 0.010000 1.000000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0146">
+        <pose>0.225000 7.830000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.550000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0147">
+        <pose>1.750000 7.830000 2.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.500000 0.010000 0.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0148">
+        <pose>3.525000 7.830000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0149">
+        <pose>4.650000 7.830000 2.450000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.200000 0.010000 0.300000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0150">
+        <pose>5.775000 7.830000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0151">
+        <pose>7.275000 7.830000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.950000 0.010000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0152">
+        <pose>8.775000 7.830000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.050000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0153">
+        <pose>10.225000 7.830000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.010000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0154">
+        <pose>11.650000 7.830000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.000000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0155">
+        <pose>13.375000 7.830000 2.475000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.450000 0.010000 0.250000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0156">
+        <pose>14.725000 7.855000 1.300000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.250000 0.010000 2.600000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0157">
+        <pose>0.050000 4.000000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 5.600000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0158">
+        <pose>0.425000 4.000000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 5.600000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0159">
+        <pose>0.725000 3.900000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.450000 7.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0160">
+        <pose>1.575000 3.725000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.250000 7.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0161">
+        <pose>2.300000 3.900000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 7.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0162">
+        <pose>2.950000 3.775000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.100000 7.350000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0163">
+        <pose>3.625000 4.150000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.250000 6.600000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0164">
+        <pose>4.750000 3.125000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.000000 8.650000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0165">
+        <pose>5.775000 5.125000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 4.650000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0166">
+        <pose>6.225000 3.350000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.850000 1.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0167">
+        <pose>6.350000 1.850000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 1.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0168">
+        <pose>7.050000 2.525000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.800000 2.750000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0169">
+        <pose>6.775000 5.725000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.750000 3.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0170">
+        <pose>7.550000 3.350000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 1.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0171">
+        <pose>7.725000 1.850000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.550000 1.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0172">
+        <pose>8.125000 5.125000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.950000 4.650000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0173">
+        <pose>8.575000 1.850000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 1.700000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0174">
+        <pose>8.625000 5.725000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 3.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0175">
+        <pose>8.700000 2.450000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 2.900000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0176">
+        <pose>8.775000 5.725000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 3.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0177">
+        <pose>7.450000 -0.525000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>3.400000 1.350000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0178">
+        <pose>9.225000 4.225000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.850000 6.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0179">
+        <pose>9.725000 5.125000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 4.650000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0180">
+        <pose>9.625000 -0.475000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.650000 2.650000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0181">
+        <pose>10.025000 0.375000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 0.850000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0182">
+        <pose>10.125000 1.850000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.950000 1.700000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0183">
+        <pose>10.500000 3.350000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.400000 1.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0184">
+        <pose>10.950000 1.850000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.500000 1.700000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0185">
+        <pose>10.725000 0.350000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.350000 1.000000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0186">
+        <pose>11.425000 0.400000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 0.900000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0187">
+        <pose>10.675000 5.725000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.750000 3.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0188">
+        <pose>11.425000 2.450000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.450000 2.900000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0189">
+        <pose>11.875000 4.225000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.450000 6.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0190">
+        <pose>12.125000 0.350000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.350000 1.000000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0191">
+        <pose>12.825000 0.375000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.050000 0.850000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0192">
+        <pose>12.550000 1.850000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.900000 1.700000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0193">
+        <pose>13.350000 5.125000 -0.040000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.500000 4.650000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0194">
+        <pose>1.750000 7.525000 0.285000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.500000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0195">
+        <pose>4.650000 7.525000 0.285000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.200000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0196">
+        <pose>6.700000 0.450000 0.860000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.900000 0.600000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0197">
+        <pose>6.450000 -1.500000 0.860000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>5.400000 0.600000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0198">
+        <pose>8.400000 0.375000 0.860000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.500000 0.450000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0199">
+        <pose>7.275000 7.525000 0.960000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.950000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0200">
+        <pose>10.225000 7.525000 0.960000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0201">
+        <pose>11.700000 0.925000 0.960000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.800000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0202">
+        <pose>13.375000 7.525000 0.960000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.450000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0203">
+        <pose>9.225000 -0.600000 1.060000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 2.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0204">
+        <pose>10.250000 0.925000 1.760000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0205">
+        <pose>11.700000 0.925000 2.160000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.800000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0206">
+        <pose>1.750000 7.650000 2.235000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.500000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0207">
+        <pose>4.650000 7.650000 2.235000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.200000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0208">
+        <pose>10.250000 0.925000 2.260000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0209">
+        <pose>7.275000 7.650000 2.310000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.950000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0210">
+        <pose>9.225000 -0.600000 2.310000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 2.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0211">
+        <pose>10.225000 7.650000 2.310000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.850000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0212">
+        <pose>13.375000 7.650000 2.310000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.450000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0213">
+        <pose>0.050000 7.325000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 1.050000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0214">
+        <pose>0.050000 0.600000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 1.200000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0215">
+        <pose>0.250000 3.925000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 7.850000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0216">
+        <pose>0.425000 7.325000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 1.050000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0217">
+        <pose>0.425000 0.600000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 1.200000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0218">
+        <pose>0.725000 0.175000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.450000 0.350000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0219">
+        <pose>2.300000 0.175000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.200000 0.350000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0220">
+        <pose>2.950000 0.050000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.100000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0221">
+        <pose>3.625000 -0.575000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.250000 2.850000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0222">
+        <pose>3.150000 7.650000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>5.300000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0223">
+        <pose>5.850000 5.875000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.100000 3.950000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0224">
+        <pose>5.900000 1.775000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.300000 2.050000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0225">
+        <pose>6.350000 2.675000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.250000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0226">
+        <pose>6.775000 3.950000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.750000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0227">
+        <pose>6.850000 0.950000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.600000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0228">
+        <pose>7.725000 2.675000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.550000 0.250000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0229">
+        <pose>7.825000 0.875000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.350000 0.550000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0230">
+        <pose>8.275000 1.700000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.550000 2.200000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0231">
+        <pose>7.275000 7.650000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.750000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0232">
+        <pose>8.700000 5.875000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.100000 3.950000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0233">
+        <pose>6.450000 -1.900000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>5.400000 0.200000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0234">
+        <pose>8.850000 0.800000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.600000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0235">
+        <pose>9.225000 -0.500000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.150000 3.000000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0236">
+        <pose>9.950000 0.925000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.300000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0237">
+        <pose>10.100000 2.750000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.000000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0238">
+        <pose>10.650000 1.825000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.100000 1.950000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0239">
+        <pose>10.950000 2.750000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.500000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0240">
+        <pose>10.150000 7.650000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.800000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0241">
+        <pose>10.675000 3.950000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.750000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0242">
+        <pose>11.600000 5.875000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.100000 3.950000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0243">
+        <pose>11.850000 0.925000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.300000 0.150000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0244">
+        <pose>12.550000 2.750000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.900000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0245">
+        <pose>13.125000 1.825000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.250000 1.950000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0246">
+        <pose>13.125000 7.650000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>2.950000 0.400000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0247">
+        <pose>13.925000 2.675000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.350000 0.250000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="planar_0248">
+        <pose>14.725000 5.200000 2.560000 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.250000 5.300000 0.100000</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

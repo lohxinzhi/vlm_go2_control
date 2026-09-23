@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>go2_vlm_scene</name>
+  <version>0.1.0</version>
+  <description>Go2 RGB frame buffering and scene capture, Task 3 Stage 1.</description>
+  <maintainer email="user@localhost.local">Workspace user</maintainer>
+  <license>Apache-2.0</license>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>rcl_interfaces</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>go2_vlm_interfaces</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <test_depend>python3-pytest</test_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>

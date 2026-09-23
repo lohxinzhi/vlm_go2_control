@@ -42,3 +42,34 @@ compile_commands.json
 
 # Logs
 *.log
+
+# Task 3 credentials, generated ROS output, and offline test output
+.env
+.env.*
+!.env.example
+credentials.env
+credentials.env.*
+secrets.env
+secrets.env.*
+*.pem
+*.key
+.secrets/
+secrets/
+install/
+log/
+.ros/
+.runtime/
+.pytest_cache/
+*.egg-info/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+junit*.xml
+.tox/
+.nox/
+
+# Explicit bytecode rule; keep the existing broader Python exclusions.
+*.pyc
+# Runtime apartment meshes are Wavefront assets, not compiled object files.
+!/src/go2_house_world/models/**/*.obj

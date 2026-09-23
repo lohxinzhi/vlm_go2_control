@@ -1,0 +1,22 @@
+scene_server:
+  ros__parameters:
+    camera_topic: /rgb_image
+    # Receipt age measured with monotonic time; 0 disables rejection.
+    stale_frame_threshold_sec: 2.0
+    retained_scene_count: 10
+    # Relative paths resolve from the process working directory.
+    runtime_data_directory: .runtime/go2_vlm_scene
+    image_save_format: png
+    jpeg_quality: 95
+    # Safe default: no SDK import, client construction, data URI, or network request.
+    enable_external_api_calls: false
+    default_provider: openai
+    openai_model: gpt-4o-mini
+    gemini_model: gemini-3.8-flash
+    # Deprecated for Task 3; retained only for backwards compatibility.
+    qwen_model: qwen3-vl-flash
+    # Active secrets: OPENAI_API_KEY / GEMINI_API_KEY.
+    # Legacy only: DASHSCOPE_API_KEY and QWEN_BASE_URL; neither is required.
+    api_jpeg_quality: 90
+    api_max_output_tokens: 256
+    api_timeout_sec: 30.0
