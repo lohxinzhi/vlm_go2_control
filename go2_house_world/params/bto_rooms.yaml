@@ -1,0 +1,31 @@
+rooms:
+  0: {
+    name: "Living Room",
+    x: 1.73,
+    y: 3.82,
+    yaw_deg: 90
+  }
+  1: {
+    name: "Kitchen",
+    x: 5.69,
+    y: -4.82,
+    yaw_deg: 0
+  }
+  2: {
+    name: "Bedroom 1",
+    x: 11.54,
+    y: 4.92,
+    yaw_deg: 110
+  }
+  3: {
+    name: "Bedroom 2",
+    x: 14.37,
+    y: -4.92,
+    yaw_deg: 70
+  }
+  4: {
+    name: "Bedroom 3",
+    x: 21.57,
+    y: 3.08,
+    yaw_deg: 90
+  }
