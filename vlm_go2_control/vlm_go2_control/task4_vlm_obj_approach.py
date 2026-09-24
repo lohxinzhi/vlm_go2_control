@@ -1,14 +1,14 @@
-#!/usr/bin/env python3
 import argparse
 import math
 import os
 
+from ament_index_python.packages import get_package_share_directory
+from geometry_msgs.msg import PoseStamped
+from nav2_simple_commander.robot_navigator import BasicNavigator
+# Retained for the forthcoming VLM client integration.
+from openai import OpenAI  # noqa: F401
 import rclpy
 import yaml
-from nav2_simple_commander.robot_navigator import BasicNavigator
-from geometry_msgs.msg import PoseStamped
-from ament_index_python.packages import get_package_share_directory
-
 
 def make_pose(nav: BasicNavigator, x: float, y: float,
               yaw_deg: float) -> PoseStamped:
@@ -34,8 +34,7 @@ def goto_room(room_id: int, nav: BasicNavigator, rooms: dict) -> str:
         nav, room['x'], room['y'], room['yaw_deg']))
     while not nav.isTaskComplete():
         rclpy.spin_once(nav, timeout_sec=0.2)
-    return str(nav.getResult()) #SUCCEEDED / CANCELED / FAILED
-
+    return str(nav.getResult())  # SUCCEEDED / CANCELED / FAILED
 
 
 def main():

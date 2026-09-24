@@ -18,7 +18,10 @@ setup(
         (os.path.join('share', package_name, 'params'), glob('params/*.yaml')),
         (os.path.join('share', package_name, 'rviz'), glob('rviz/*.rviz')),
     ],
-    install_requires=['setuptools'],
+    install_requires=[
+        'openai>=1.0.0,<3.0.0',
+        'setuptools',
+    ],
     zip_safe=True,
     maintainer='xinzhi',
     maintainer_email='lxzraizer@gmail.com',
