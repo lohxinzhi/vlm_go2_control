@@ -20,7 +20,7 @@ rooms:
   3: {
     name: "Bedroom 2",
     x: 14.37,
-    y: -4.92,
+    y: 4.92,
     yaw_deg: 70
   }
   4: {

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import math
 import os
 
@@ -38,11 +39,18 @@ def goto_room(room_id: int, nav: BasicNavigator, rooms: dict) -> str:
 
 
 def main():
-    """Start Nav2 navigation and drive the robot to room 4."""
+    """Start Nav2 navigation and drive the robot to the selected room."""
+    parser = argparse.ArgumentParser(
+        description='Navigate the Go2 robot to a room from bto_rooms.yaml.')
+    parser.add_argument(
+        'room', type=int, help='Room number to navigate to, for example 4')
+    args, _ = parser.parse_known_args()
+
     rclpy.init()
     nav = BasicNavigator()
     try:
         nav.get_logger().info('Waiting for Nav2 to become active...')
+        nav.setInitialPose(make_pose(nav, -0.5, 0.0, -1.15))
         nav.waitUntilNav2Active()
 
         world_dir = get_package_share_directory('go2_house_world')
@@ -50,8 +58,9 @@ def main():
         with open(room_yaml_path, 'r', encoding='utf-8') as room_file:
             rooms = yaml.safe_load(room_file)['rooms']
 
-        result = goto_room(4, nav, rooms)
-        nav.get_logger().info(f'Navigation to room 4 finished: {result}')
+        result = goto_room(args.room, nav, rooms)
+        nav.get_logger().info(
+            f'Navigation to room {args.room} finished: {result}')
     finally:
         nav.destroy_node()
         rclpy.shutdown()
