@@ -18,7 +18,6 @@ def generate_launch_description():
     """Build the single-robot simulation and navigation launch description."""
     package_dir = get_package_share_directory('vlm_go2_control')
     nav2_dir = get_package_share_directory('nav2_bringup')
-    description_dir = get_package_share_directory('unitree_go2_description')
     world_dir = get_package_share_directory('go2_house_world')
     defaults = {
         'slam': ('false', 'Run online mapping; false uses the supplied map'),

@@ -19,7 +19,10 @@ setup(
         (os.path.join('share', package_name, 'rviz'), glob('rviz/*.rviz')),
     ],
     install_requires=[
+        'numpy<2',
         'openai>=1.0.0,<3.0.0',
+        'opencv-python',
+        'pyyaml',
         'setuptools',
     ],
     zip_safe=True,

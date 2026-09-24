@@ -1,2 +1,6 @@
+# ROS 2 Jazzy's cv_bridge binary is built against NumPy 1.x.
+numpy<2
+opencv-python
 # Keep this constraint in sync with vlm_go2_control/setup.py.
 openai>=1.0.0,<3.0.0
+pyyaml
