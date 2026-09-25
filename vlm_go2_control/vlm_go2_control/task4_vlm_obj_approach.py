@@ -87,18 +87,24 @@ class Camera (Node):
 class VLMDialogue(Node):
     def __init__(self, cam:Camera):
         super().__init__('vlm_agent')
+        with open(room_yaml_path, 'r', encoding='utf-8') as room_file:
+            self.rooms = yaml.safe_load(room_file)['rooms']
+        room_names = ', '.join(room['name'] for room in self.rooms.values())
         self.SYSTEM = '''You are the dialogue manager of an indoor assistant robot.
             For EVERY user message, reply ONLY with one JSON object, no other text:
             {"actions": [{"action": "approach", "object": "<object name>"}]}
             The actions array must be nonempty and may contain multiple actions in
             the order they should be performed. Each action must be one of:
             {"action": "goto_room", "room": <int 0-4>}
+            {"action": "goto_room_name", "room_name": "<room name>"}
             {"action": "approach", "object": "<object name>"}
             {"action": "stop"}
             {"action": "chat", "reply": "<answer or clarification question>"}
             Use a separate approach action for each requested object. A stop action
             ends the sequence. If the request is impossible or unsafe, use a chat
-            action to explain instead of planning that action.'''
+            action to explain instead of planning that action.
+            Use goto_room for a room ID and goto_room_name for a room name.
+            Valid room names are: ''' + room_names + '.'
         self.history = [{'role': 'system', 'content': self.SYSTEM}]
         self.ground = ('Locate the {obj} in the image. Answer ONLY with JSON: '
           '{{"found":true/false, "bbox": [x1, y1, x2, y2]}} '
@@ -117,8 +123,14 @@ class VLMDialogue(Node):
         self.nav_client = ActionClient(
             self, NavigateToPose, '/navigate_to_pose',
             callback_group=self.nav_callback_group)
-        with open(room_yaml_path, 'r', encoding='utf-8') as room_file:
-            self.rooms = yaml.safe_load(room_file)['rooms']
+
+    def room_id_from_name(self, room_name: str):
+        """Resolve a room name from the YAML file, ignoring case and spacing."""
+        normalized_name = ' '.join(room_name.split()).casefold()
+        for room_id, room in self.rooms.items():
+            if ' '.join(room['name'].split()).casefold() == normalized_name:
+                return room_id
+        return None
 
     def goto_room(self, room_id: int) -> str:
         """Send a room pose to bt_navigator and wait for its result."""
@@ -165,8 +177,14 @@ class VLMDialogue(Node):
         self.history.append({'role': 'assistant', 'content': json.dumps(plan)})
         replies = []
         for cmd in plan['actions']:
-            if cmd['action'] == 'goto_room':
-                room_id = cmd['room']
+            if cmd['action'] in ('goto_room', 'goto_room_name'):
+                if cmd['action'] == 'goto_room_name':
+                    room_id = self.room_id_from_name(cmd['room_name'])
+                    if room_id is None:
+                        replies.append(f"Room {cmd['room_name']} is not defined.")
+                        break
+                else:
+                    room_id = cmd['room']
                 if room_id not in self.rooms:
                     replies.append(f'Room {room_id} is not defined.')
                     break
