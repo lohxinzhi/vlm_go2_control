@@ -188,14 +188,16 @@ class VLMDialogue(Node):
                 if room_id not in self.rooms:
                     replies.append(f'Room {room_id} is not defined.')
                     break
-                result = self.goto_room(room_id)
                 room_name = self.rooms[room_id]['name']
+                print(f'Robot: Going to {room_name}.', flush=True)
+                result = self.goto_room(room_id)
                 if result == 'SUCCEEDED':
                     replies.append(f'Arrived at {room_name}.')
                 else:
                     replies.append(f'Could not reach {room_name}: {result}.')
                     break
             elif cmd['action'] == 'approach':
+                print(f"Robot: Approaching the {cmd['object']}.", flush=True)
                 ok = self.approach(cmd['object'])
                 replies.append(
                     f"I am now next to the {cmd['object']}." if ok else
@@ -203,6 +205,7 @@ class VLMDialogue(Node):
                 if not ok:
                     break
             elif cmd['action'] == 'stop':
+                print('Robot: Stopping.', flush=True)
                 self.pub_cmd.publish(Twist())
                 replies.append('Stopped.')
                 break
