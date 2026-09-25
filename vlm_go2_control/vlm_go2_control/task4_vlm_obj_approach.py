@@ -1,16 +1,20 @@
 import argparse
 import math
 import os
+from threading import Event
 
+from action_msgs.msg import GoalStatus
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import PoseStamped
+from nav2_msgs.action import NavigateToPose
 from sensor_msgs.msg import Image, LaserScan
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
 
-from nav2_simple_commander.robot_navigator import BasicNavigator
 import rclpy
+from rclpy.action import ActionClient
+from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
 
 
@@ -27,34 +31,22 @@ import numpy as np
 # client = OpenAI(api_key=API_KEY, base_url='https://ws-9lbexwoqsefh78p8.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1')
 # MODEL = 'qwen3.5-flash'
 
+world_dir = get_package_share_directory('go2_house_world')
+room_yaml_path = os.path.join(world_dir, 'params', 'bto_rooms.yaml')
 
 
-
-def make_pose(nav: BasicNavigator, x: float, y: float,
+def make_pose(node: Node, x: float, y: float,
               yaw_deg: float) -> PoseStamped:
     """Create a PoseStamped message for navigation."""
     p = PoseStamped()
     p.header.frame_id = 'map'
-    p.header.stamp = nav.get_clock().now().to_msg()
+    p.header.stamp = node.get_clock().now().to_msg()
     p.pose.position.x = x
     p.pose.position.y = y
     yaw_rad = math.radians(yaw_deg)
     p.pose.orientation.z = math.sin(yaw_rad / 2)
     p.pose.orientation.w = math.cos(yaw_rad / 2)
     return p
-
-
-def goto_room(room_id: int, nav: BasicNavigator, rooms: dict) -> str:
-    """Navigate to the room identified by room_id."""
-    if room_id not in rooms:
-        raise KeyError(f'Room {room_id} is not defined in bto_rooms.yaml')
-
-    room = rooms[room_id]
-    nav.goToPose(make_pose(
-        nav, room['x'], room['y'], room['yaw_deg']))
-    while not nav.isTaskComplete():
-        rclpy.spin_once(nav, timeout_sec=0.2)
-    return str(nav.getResult())  # SUCCEEDED / CANCELED / FAILED
 
 class Camera (Node):
     def __init__(self):
@@ -100,6 +92,7 @@ class VLMDialogue(Node):
             {"actions": [{"action": "approach", "object": "<object name>"}]}
             The actions array must be nonempty and may contain multiple actions in
             the order they should be performed. Each action must be one of:
+            {"action": "goto_room", "room": <int 0-4>}
             {"action": "approach", "object": "<object name>"}
             {"action": "stop"}
             {"action": "chat", "reply": "<answer or clarification question>"}
@@ -120,6 +113,49 @@ class VLMDialogue(Node):
         self.timer = self.create_timer(0.2,self.timer_cb)
         self.pub_cmd = self.create_publisher(Twist, "/cmd_vel", 10)
         self.pub_bbox = self.create_publisher(Detection2D, "/ground_bbox", 10)
+        self.nav_callback_group = ReentrantCallbackGroup()
+        self.nav_client = ActionClient(
+            self, NavigateToPose, '/navigate_to_pose',
+            callback_group=self.nav_callback_group)
+        with open(room_yaml_path, 'r', encoding='utf-8') as room_file:
+            self.rooms = yaml.safe_load(room_file)['rooms']
+
+    def goto_room(self, room_id: int) -> str:
+        """Send a room pose to bt_navigator and wait for its result."""
+        if room_id not in self.rooms:
+            raise KeyError(f'Room {room_id} is not defined in bto_rooms.yaml')
+        if not self.nav_client.wait_for_server(timeout_sec=5.0):
+            return 'UNAVAILABLE'
+
+        room = self.rooms[room_id]
+        goal = NavigateToPose.Goal()
+        goal.pose = make_pose(self, room['x'], room['y'], room['yaw_deg'])
+        goal_future = self.nav_client.send_goal_async(goal)
+        goal_ready = Event()
+        goal_future.add_done_callback(lambda _: goal_ready.set())
+        while rclpy.ok() and not goal_ready.wait(0.2):
+            pass
+        if not goal_ready.is_set():
+            return 'FAILED'
+
+        goal_handle = goal_future.result()
+        if not goal_handle.accepted:
+            return 'REJECTED'
+
+        result_future = goal_handle.get_result_async()
+        result_ready = Event()
+        result_future.add_done_callback(lambda _: result_ready.set())
+        while rclpy.ok() and not result_ready.wait(0.2):
+            pass
+        if not result_ready.is_set():
+            return 'FAILED'
+
+        status = result_future.result().status
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            return 'SUCCEEDED'
+        if status == GoalStatus.STATUS_CANCELED:
+            return 'CANCELED'
+        return 'FAILED'
     
     def timer_cb(self):
         user = input('You: ').strip()
@@ -127,15 +163,21 @@ class VLMDialogue(Node):
         out = self.client.chat.completions.create(model=self.text_model, messages=self.history)
         plan = json.loads(out.choices[0].message.content)
         self.history.append({'role': 'assistant', 'content': json.dumps(plan)})
-        # if cmd['action'] == 'goto_room':
-        #     result = goto_room(cmd['room'])
-        #     reply = report_arrival(result, cmd['room'])
-        # + auto describe
-        # elif cmd['action'] == 'describe':
-        #     reply = describe_scene()
         replies = []
         for cmd in plan['actions']:
-            if cmd['action'] == 'approach':
+            if cmd['action'] == 'goto_room':
+                room_id = cmd['room']
+                if room_id not in self.rooms:
+                    replies.append(f'Room {room_id} is not defined.')
+                    break
+                result = self.goto_room(room_id)
+                room_name = self.rooms[room_id]['name']
+                if result == 'SUCCEEDED':
+                    replies.append(f'Arrived at {room_name}.')
+                else:
+                    replies.append(f'Could not reach {room_name}: {result}.')
+                    break
+            elif cmd['action'] == 'approach':
                 ok = self.approach(cmd['object'])
                 replies.append(
                     f"I am now next to the {cmd['object']}." if ok else
