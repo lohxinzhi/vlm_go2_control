@@ -8,6 +8,7 @@ __pycache__/
 .venv/
 venv/
 env/
+.env
 
 # IDE/editor files
 .vscode/
@@ -26,11 +27,16 @@ dist/
 out/
 *.o
 *.obj
+!go2_house_world/models/greenquartz_bto/meshes/GreenQuartz_BTO.obj
 *.so
 *.a
 *.dylib
 *.dll
 *.exe
+
+# Colcon generated directories
+install/
+log/
 
 # ROS / CMake generated files
 CMakeCache.txt
