@@ -6,14 +6,14 @@
       <collision name="collision">
         <geometry>
           <box>
-            <size>0.3 0.3 0.3</size>
+            <size>1.2 1.2 1.2</size>
           </box>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <box>
-            <size>0.3 0.3 0.3</size>
+            <size>1.2 1.2 1.2</size>
           </box>
         </geometry>
         <material>

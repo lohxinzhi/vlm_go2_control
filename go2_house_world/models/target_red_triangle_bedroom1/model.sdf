@@ -7,6 +7,7 @@
         <geometry>
           <mesh>
             <uri>model://target_red_triangle_bedroom1/meshes/triangle.dae</uri>
+            <scale>4 4 4</scale>
           </mesh>
         </geometry>
       </collision>
@@ -14,6 +15,7 @@
         <geometry>
           <mesh>
             <uri>model://target_red_triangle_bedroom1/meshes/triangle.dae</uri>
+            <scale>4 4 4</scale>
           </mesh>
         </geometry>
         <material>
