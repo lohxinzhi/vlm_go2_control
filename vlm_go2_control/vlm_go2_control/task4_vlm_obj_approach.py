@@ -6,6 +6,7 @@ from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image, LaserScan
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
 
 from nav2_simple_commander.robot_navigator import BasicNavigator
@@ -64,6 +65,8 @@ class Camera (Node):
         self.bridge = CvBridge()
         self.create_subscription(Image, '/rgb_image', self.cam_cb, 10)
         self.create_subscription(LaserScan, '/scan', self.scan_cb, 10)
+        self.front_distance_publisher = self.create_publisher(
+            Float32, '/front_distance', 10)
 
     def cam_cb(self, msg):
         self.frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
@@ -71,7 +74,10 @@ class Camera (Node):
     def scan_cb(self, msg):
         self.scan = msg
         self.front_distance = self.get_front_distance(msg)
-        print(self.front_distance)
+        if self.front_distance is not None:
+            distance_msg = Float32()
+            distance_msg.data = self.front_distance
+            self.front_distance_publisher.publish(distance_msg)
 
     @staticmethod
     def get_front_distance(scan):
@@ -160,19 +166,15 @@ class VLMDialogue(Node):
                 # cmd.angular.z = np.float64(1.0)
                 continue
             x1, y1, x2, y2 = d['bbox']
-            bbox_msg = Detection2D()
-            bbox_msg.header.stamp = self.get_clock().now().to_msg()
-            bbox_msg.bbox.center.position.x = np.float64((x1 + x2) / 2.0)
-            bbox_msg.bbox.center.position.y = np.float64((y1 + y2) / 2.0)
-            bbox_msg.bbox.size_x = np.float64(x2 - x1)
-            bbox_msg.bbox.size_y = np.float64(y2 - y1)
-            self.pub_bbox.publish(bbox_msg)
+            bbox_msg = self.get_bbox_msg(x1,y1,x2,y2)
+            self.pub_bbox.publish(bbox_msg) # publish bbox
 
             h, w = self.cam.frame.shape[:2]
             err = ((x1 + x2) / 2 - w / 2) / (w / 2)
             # -1 .. 1
-            box_h = (y2 - y1) / h
-            if box_h > 0.55:        # close enough -> stop
+            # box_h = (y2 - y1) / h
+            # if box_h > 0.55:        # close enough -> stop
+            if self.cam.front_distance <= 2.0 and err < 0.25:        # close enough -> stop
                 self.pub_cmd.publish(cmd)
                 return True
             cmd.angular.z = -0.1 * err
@@ -180,6 +182,16 @@ class VLMDialogue(Node):
             self.pub_cmd.publish(cmd)
         self.pub_cmd.publish(Twist())
         return False
+
+    def get_bbox_msg(self, x1,y1,x2,y2):
+        bbox_msg = Detection2D()
+        bbox_msg.header.stamp = self.get_clock().now().to_msg()
+        bbox_msg.bbox.center.position.x = np.float64((x1 + x2) / 2.0)
+        bbox_msg.bbox.center.position.y = np.float64((y1 + y2) / 2.0)
+        bbox_msg.bbox.size_x = np.float64(x2 - x1)
+        bbox_msg.bbox.size_y = np.float64(y2 - y1)
+        return bbox_msg
+
     
 
 

@@ -3,6 +3,7 @@ import rclpy
 from cv_bridge import CvBridge, CvBridgeError
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
 
 
@@ -21,14 +22,21 @@ class ImageAndBoundingBoxViewer(Node):
 
 		self.image_subscription = self.create_subscription(
 			Image, self.image_topic, self.image_callback, 10)
-		self.bounding_box_subscription = self.create_subscription(
+		self.create_subscription(
 			Detection2D,
 			self.bounding_box_topic,
 			self.bounding_box_callback,
 			10,
 		)
+		self.front_distance_subscription = self.create_subscription(
+			Float32,
+			'/front_distance',
+			self.front_distance_callback,
+			10,
+		)
 
 		self.latest_detection = None
+		self.front_distance = None
 		self.get_logger().info(
 			f'Subscribing to {self.image_topic} and '
 			f'{self.bounding_box_topic}')
@@ -36,6 +44,10 @@ class ImageAndBoundingBoxViewer(Node):
 	def bounding_box_callback(self, message:Detection2D):
 		"""Store the newest detection for the next camera frame."""
 		self.latest_detection = message
+
+	def front_distance_callback(self, message:Float32):
+		"""Store the latest forward distance in meters."""
+		self.front_distance = message.data
 
 	def image_callback(self, message:Image):
 		"""Convert and display an image with the newest detection boxes."""
@@ -64,20 +76,19 @@ class ImageAndBoundingBoxViewer(Node):
 		y2 = min(frame.shape[0] - 1, round(center.y + height / 2))
 		cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-		if detection.results:
-			result = detection.results[0]
-			label = result.hypothesis.class_id
-			score = result.hypothesis.score
-			text = f'{label} {score:.2f}' if label else f'{score:.2f}'
-			cv2.putText(
-				frame,
-				text,
-				(x1, max(20, y1 - 8)),
-				cv2.FONT_HERSHEY_SIMPLEX,
-				0.6,
-				(0, 255, 0),
-				2,
-			)
+		label = (
+			f'{self.front_distance:.2f} m'
+			if self.front_distance is not None else '-- m'
+		)
+		cv2.putText(
+			frame,
+			label,
+			(x1, max(20, y1 - 8)),
+			cv2.FONT_HERSHEY_SIMPLEX,
+			0.6,
+			(0, 255, 0),
+			2,
+		)
 
 	def destroy_node(self):
 		cv2.destroyAllWindows()
