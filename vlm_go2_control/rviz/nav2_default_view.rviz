@@ -8,7 +8,7 @@ Panels:
         - /TF1/Frames1
         - /TF1/Tree1
       Splitter Ratio: 0.5833333134651184
-    Tree Height: 287
+    Tree Height: 445
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -85,29 +85,53 @@ Visualization Manager:
           Value: true
         base_link:
           Value: true
-        base_scan:
-          Value: true
-        camera_depth_frame:
-          Value: true
-        camera_depth_optical_frame:
-          Value: true
         camera_link:
-          Value: true
-        camera_rgb_frame:
-          Value: true
-        camera_rgb_optical_frame:
-          Value: true
-        caster_back_left_link:
-          Value: true
-        caster_back_right_link:
           Value: true
         imu_link:
           Value: true
+        lf_foot_link:
+          Value: true
+        lf_hip_link:
+          Value: true
+        lf_lower_leg_link:
+          Value: true
+        lf_upper_leg_link:
+          Value: true
+        lh_foot_link:
+          Value: true
+        lh_hip_link:
+          Value: true
+        lh_lower_leg_link:
+          Value: true
+        lh_upper_leg_link:
+          Value: true
+        lidar_l1_link:
+          Value: true
+        map:
+          Value: true
         odom:
           Value: true
-        wheel_left_link:
+        rf_foot_link:
           Value: true
-        wheel_right_link:
+        rf_hip_link:
+          Value: true
+        rf_lower_leg_link:
+          Value: true
+        rf_upper_leg_link:
+          Value: true
+        rh_foot_link:
+          Value: true
+        rh_hip_link:
+          Value: true
+        rh_lower_leg_link:
+          Value: true
+        rh_upper_leg_link:
+          Value: true
+        trunk:
+          Value: true
+        velodyne:
+          Value: true
+        velodyne_base_link:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -115,7 +139,40 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                lidar_l1_link:
+                  {}
+                trunk:
+                  camera_link:
+                    {}
+                  imu_link:
+                    {}
+                  lf_hip_link:
+                    lf_upper_leg_link:
+                      lf_lower_leg_link:
+                        lf_foot_link:
+                          {}
+                  lh_hip_link:
+                    lh_upper_leg_link:
+                      lh_lower_leg_link:
+                        lh_foot_link:
+                          {}
+                  rf_hip_link:
+                    rf_upper_leg_link:
+                      rf_lower_leg_link:
+                        rf_foot_link:
+                          {}
+                  rh_hip_link:
+                    rh_upper_leg_link:
+                      rh_lower_leg_link:
+                        rh_foot_link:
+                          {}
+                velodyne_base_link:
+                  velodyne:
+                    {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -524,6 +581,20 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /waypoints
       Value: true
+    - Class: rviz_default_plugins/Image
+      Enabled: true
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /rgb_image
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -582,12 +653,14 @@ Window Geometry:
     collapsed: false
   Docking:
     collapsed: false
-  Height: 893
+  Height: 1011
   Hide Left Dock: false
   Hide Right Dock: false
+  Image:
+    collapsed: false
   Navigation 2:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000015600000327fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000100044006900730070006c006100790073010000003b0000015a000000c700fffffffb00000018004e0061007600690067006100740069006f006e00200032010000019b000001c7000001c700fffffffb0000001e005200650061006c00730065006e0073006500430061006d00650072006100000002c6000000c10000002800ffffff000000010000014700000327fc0200000005fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003b00000143000000a000fffffffb0000000e0044006f0063006b0069006e006701000001840000011e0000011e00fffffffb0000001000530065006c006500630074006f007201000002a8000000ba000000ba00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000003a10000032700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000015600000395fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005d00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000100044006900730070006c006100790073010000003f000001fd000000cc00fffffffb0000001e005200650061006c00730065006e0073006500430061006d00650072006100000002c6000000c10000001700fffffffb0000000a0049006d0061006700650100000242000001920000001700ffffff000000010000014700000395fc0200000005fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fc0000003f00000395000002170100001efa000000000100000002fb00000018004e0061007600690067006100740069006f006e002000320100000000ffffffff0000013a00fffffffb0000000a0056006900650077007301000005f7000001470000010000fffffffb0000000e0044006f0063006b0069006e006700000001a4000002300000016200fffffffb0000001000530065006c006500630074006f007200000002e1000000f3000000d300fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d00650100000000000004500000000000000000000004950000039500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   RealsenseCamera:
     collapsed: false
   Selection:
@@ -598,6 +671,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1610
-  X: 1091
-  Y: 222
+  Width: 1854
+  X: 66
+  Y: 32

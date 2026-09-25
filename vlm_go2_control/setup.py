@@ -41,6 +41,7 @@ setup(
             'simulation_odometry = vlm_go2_control.simulation_odometry:main',
             'set_initial_pose = vlm_go2_control.set_initial_pose:main',
             'task4_vlm_obj_approach = vlm_go2_control.task4_vlm_obj_approach:main',
+            'show_img = vlm_go2_control.show_img:main',
         ],
     },
 )
