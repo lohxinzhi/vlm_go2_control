@@ -34,6 +34,7 @@ setup(
             'template_node = vlm_go2_control.template_node:main',
             'simulation_odometry = vlm_go2_control.simulation_odometry:main',
             'set_initial_pose = vlm_go2_control.set_initial_pose:main',
+            'dialogue_manager = vlm_go2_control.dialogue_manager:main',
         ],
     },
 )
