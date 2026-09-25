@@ -96,12 +96,16 @@ class VLMDialogue(Node):
     def __init__(self, cam:Camera):
         super().__init__('vlm_agent')
         self.SYSTEM = '''You are the dialogue manager of an indoor assistant robot.
-            For EVERY user message, reply ONLY with
-            one JSON object, no other text:
+            For EVERY user message, reply ONLY with one JSON object, no other text:
+            {"actions": [{"action": "approach", "object": "<object name>"}]}
+            The actions array must be nonempty and may contain multiple actions in
+            the order they should be performed. Each action must be one of:
             {"action": "approach", "object": "<object name>"}
             {"action": "stop"}
             {"action": "chat", "reply": "<answer or clarification question>"}
-            If the request is impossible (unknown room, unsafe), use "chat" to explain.'''
+            Use a separate approach action for each requested object. A stop action
+            ends the sequence. If the request is impossible or unsafe, use a chat
+            action to explain instead of planning that action.'''
         self.history = [{'role': 'system', 'content': self.SYSTEM}]
         self.ground = ('Locate the {obj} in the image. Answer ONLY with JSON: '
           '{{"found":true/false, "bbox": [x1, y1, x2, y2]}} '
@@ -121,20 +125,30 @@ class VLMDialogue(Node):
         user = input('You: ').strip()
         self.history.append({'role': 'user', 'content': user})
         out = self.client.chat.completions.create(model=self.text_model, messages=self.history)
-        cmd = json.loads(out.choices[0].message.content)
-        self.history.append({'role': 'assistant', 'content': json.dumps(cmd)})
+        plan = json.loads(out.choices[0].message.content)
+        self.history.append({'role': 'assistant', 'content': json.dumps(plan)})
         # if cmd['action'] == 'goto_room':
         #     result = goto_room(cmd['room'])
         #     reply = report_arrival(result, cmd['room'])
         # + auto describe
         # elif cmd['action'] == 'describe':
         #     reply = describe_scene()
-        if cmd['action'] == 'approach':
-            ok = self.approach(cmd['object'])
-            reply = f"I am now next to the {cmd['object']}." if ok else \
-            f"Sorry, I could not find the {cmd['object']}."
-        else:
-            reply = cmd.get('reply', 'Stopped.')
+        replies = []
+        for cmd in plan['actions']:
+            if cmd['action'] == 'approach':
+                ok = self.approach(cmd['object'])
+                replies.append(
+                    f"I am now next to the {cmd['object']}." if ok else
+                    f"Sorry, I could not find the {cmd['object']}.")
+                if not ok:
+                    break
+            elif cmd['action'] == 'stop':
+                self.pub_cmd.publish(Twist())
+                replies.append('Stopped.')
+                break
+            elif cmd['action'] == 'chat':
+                replies.append(cmd['reply'])
+        reply = ' '.join(replies)
         print('Robot:', reply)
         self.history.append({'role': 'assistant', 'content': reply})
 
