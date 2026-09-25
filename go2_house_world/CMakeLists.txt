@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(go2_house_world)
 find_package(ament_cmake REQUIRED)
-install(DIRECTORY models worlds launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY models worlds DESTINATION share/${PROJECT_NAME})
 install(FILES README.md DESTINATION share/${PROJECT_NAME})
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
