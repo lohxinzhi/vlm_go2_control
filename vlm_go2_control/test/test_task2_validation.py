@@ -1,7 +1,6 @@
 """Test Task 2 command validation without using an LLM API."""
 
-from vlm_go2_control.command_parser_llm import CommandParser
-
+from vlm_go2_control.command_parser import CommandParser
 
 def main():
     """Run local command-validation tests."""

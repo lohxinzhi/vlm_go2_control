@@ -2,24 +2,30 @@
 
 from task2_test_cases import TEST_CASES
 
-from vlm_go2_control.command_parser_llm import CommandParser
+from vlm_go2_control.command_parser import CommandParser
 
 
 def commands_match(expected, actual):
-    """Return True when an actual command matches the expected command."""
+    """Check whether the actual command matches the expected command."""
 
+    # First, the action itself must match.
     if actual.get("action") != expected.get("action"):
         return False
 
     action = expected.get("action")
 
+    # For navigation commands, both the action and room number
+    # must be correct.
     if action == "goto_room":
         return (
             actual.get("room")
             == expected.get("room")
         )
 
+    # For approach commands, check that the expected object
+    # appears in the object name returned by the LLM.
     if action == "approach":
+
         expected_object = expected.get(
             "object",
             "",
@@ -35,6 +41,8 @@ def commands_match(expected, actual):
             in actual_object
         )
 
+    # For describe, stop, and chat, matching the action
+    # is enough for this evaluation.
     return True
 
 
@@ -62,27 +70,88 @@ def main():
 
         # Create a fresh parser for every test.
         #
-        # This ensures that Test 2 is not influenced
-        # by conversation history from Test 1.
+        # This prevents conversation history from one
+        # test influencing another test.
         parser = CommandParser()
 
-        user_input = test_case["input"]
+        user_input = test_case[
+            "input"
+        ]
 
-        expected = test_case["expected"]
+        expected = test_case[
+            "expected"
+        ]
 
-        category = test_case["category"]
+        category = test_case[
+            "category"
+        ]
 
+        print(
+            f"Running test "
+            f"{number:02d}/{total}..."
+        )
+
+        # Send the natural-language command to the LLM.
         actual = parser.parse(
             user_input
         )
 
+        # --------------------------------------------------
+        # API FAILURE CHECK
+        # --------------------------------------------------
+        #
+        # command_parser.py returns this specific response
+        # when the OpenAI API cannot be reached or used.
+        #
+        # We do NOT want an API failure to be counted as
+        # a parser failure, because that would make the
+        # calculated accuracy meaningless.
+        #
+        if (
+            actual.get("action") == "chat"
+            and actual.get("reply")
+            == (
+                "The language model is currently "
+                "unavailable."
+            )
+        ):
+
+            print()
+            print("========================================")
+            print("         EVALUATION STOPPED")
+            print("========================================")
+            print()
+
+            print(
+                "The LLM API is unavailable."
+            )
+
+            print(
+                "No parser accuracy has been "
+                "calculated."
+            )
+
+            print()
+            print(
+                "Check OPENAI_API_KEY, API access, "
+                "credits, and network connectivity."
+            )
+
+            return
+
+        # Compare the actual command with the expected one.
         passed = commands_match(
             expected,
             actual,
         )
 
+        # Create a result counter for this category
+        # the first time we encounter it.
         if category not in category_results:
-            category_results[category] = {
+
+            category_results[
+                category
+            ] = {
                 "correct": 0,
                 "total": 0,
             }
@@ -91,6 +160,7 @@ def main():
             category
         ]["total"] += 1
 
+        # Record whether this test passed.
         if passed:
 
             correct += 1
@@ -114,6 +184,7 @@ def main():
                 }
             )
 
+        # Print the result for this individual test.
         print(
             f"[{status}] "
             f"{number:02d}/{total}"
@@ -141,6 +212,10 @@ def main():
 
         print()
 
+    # --------------------------------------------------
+    # OVERALL ACCURACY
+    # --------------------------------------------------
+
     accuracy = (
         correct / total
     ) * 100.0
@@ -151,18 +226,29 @@ def main():
     print()
 
     print(
-        f"Overall: {correct}/{total}"
+        f"Correct: {correct}/{total}"
     )
 
     print(
         f"Accuracy: {accuracy:.1f}%"
     )
 
+    print(
+        f"Failures: {len(failures)}"
+    )
+
     print()
 
-    print("Category results:")
+    # --------------------------------------------------
+    # CATEGORY ACCURACY
+    # --------------------------------------------------
 
-    for category, results in category_results.items():
+    print("Category results:")
+    print()
+
+    for category, results in (
+        category_results.items()
+    ):
 
         category_correct = results[
             "correct"
@@ -184,6 +270,10 @@ def main():
             f"({category_accuracy:.1f}%)"
         )
 
+    # --------------------------------------------------
+    # FAILURE ANALYSIS
+    # --------------------------------------------------
+
     if failures:
 
         print()
@@ -192,29 +282,43 @@ def main():
         print("========================================")
         print()
 
-        for failure in failures:
+        for number, failure in enumerate(
+            failures,
+            start=1,
+        ):
 
             print(
-                "Input:",
+                f"Failure {number}:"
+            )
+
+            print(
+                "  Input:",
                 failure["input"],
             )
 
             print(
-                "Category:",
+                "  Category:",
                 failure["category"],
             )
 
             print(
-                "Expected:",
+                "  Expected:",
                 failure["expected"],
             )
 
             print(
-                "Actual:",
+                "  Actual:",
                 failure["actual"],
             )
 
             print()
+
+    else:
+
+        print()
+        print(
+            "No parser failures were recorded."
+        )
 
 
 if __name__ == "__main__":

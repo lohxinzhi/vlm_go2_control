@@ -1,20 +1,50 @@
-"""Interactive test for the Task 2 LLM command parser."""
+"""Interactive parser-only test for Task 2."""
 
-from vlm_go2_control.command_parser_llm import CommandParser
+import argparse
+
+from vlm_go2_control.command_parser import CommandParser
 
 
 def main():
-    """Run an interactive parser-only conversation."""
+    """Run an interactive parser test."""
 
-    parser = CommandParser()
+    argument_parser = (
+        argparse.ArgumentParser()
+    )
+
+    argument_parser.add_argument(
+        "--mock",
+        action="store_true",
+        help="Use offline mock parsing.",
+    )
+
+    args = (
+        argument_parser
+        .parse_args()
+    )
+
+    parser = CommandParser(
+        use_mock=args.mock
+    )
 
     print()
-    print("========================================")
-    print("       TASK 2 LLM PARSER TEST")
-    print("========================================")
-    print()
-    print("This does not control the robot.")
-    print("Type 'quit' to exit.")
+    print(
+        "===================================="
+    )
+
+    print(
+        "     Task 2 Command Parser"
+    )
+
+    print(
+        "===================================="
+    )
+
+    print(
+        "Robot movement is disabled "
+        "in this test."
+    )
+
     print()
 
     while True:
@@ -27,11 +57,6 @@ def main():
             "quit",
             "exit",
         ):
-
-            print(
-                "Parser test ended."
-            )
-
             break
 
         command = parser.parse(
