@@ -113,21 +113,49 @@ camera views and dashboard, run
 and action servers will not be started. See the [dashboard guide](vlm_go2_control/web/README.md)
 for control details. Do not start both dashboard launch files together.
 
-Simulation and navigation options:
+The `dashboard_and_dialogue.launch.py` launch accepts these arguments:
 
-- `gui:=true`: show the Gazebo GUI (off by default).
-- `paused:=false`: start Gazebo running immediately and activate controllers
-  automatically, without the dashboard button.
-- `use_rviz:=false`: run without RViz.
-- `world:=/absolute/path/to/world.sdf`: select another world.
-  Set `world_init_x`, `world_init_y`, `world_init_z`, and `world_init_heading`
-  to a valid pose for that world. Pass `world_name:=<SDF world name>` to the
-  dashboard launch so its Start button controls the selected world.
-- `slam:=true`: build a map online with SLAM Toolbox.
-- `map:=/absolute/path/to/map.yaml`: use another saved map with the default
-  `slam:=false` mode.
-- `params_file:=/absolute/path/to/params.yaml`: override the combined Nav2/SLAM settings.
-- `use_composition:=false`: run Nav2 servers as separate processes.
+| Argument | Default | Purpose |
+| --- | --- | --- |
+| `http_port` | `8080` | Dashboard HTTP port. |
+| `world_name` | `greenquartz_bto` | Gazebo world controlled by the dashboard. |
+| `vlm_client_type` | `openai` | Backend shared by the approach and scene-description vision servers (`openai` or `qwen`). |
+| `vlm_model` | `gpt-5-mini` | Vision model shared by the approach and scene-description servers. |
+| `dialogue_client_type` | `openai` | Dialogue language-model backend (`openai` or `qwen`). |
+| `dialogue_text_model` | `gpt-5-mini` | Language model used to interpret dialogue requests. |
+
+Override arguments on the launch command, for example:
+
+```bash
+ros2 launch vlm_go2_control dashboard_and_dialogue.launch.py \
+  vlm_client_type:=qwen vlm_model:=qwen3.5-flash \
+  dialogue_client_type:=openai dialogue_text_model:=gpt-5-mini
+```
+
+For a Qwen backend, set `QWEN_API_KEY` and `QWEN_BASE_URL` in the launch
+terminal. The lower-level `vlm_dialogue_manager.launch.py` also accepts
+`start_dialogue` (default `true`) to disable the dialogue node.
+
+The `go2_sim_nav2_launch.py` launch accepts these simulation and navigation
+arguments:
+
+| Argument | Default | Purpose |
+| --- | --- | --- |
+| `gui` | `false` | Start the Gazebo GUI with `gui:=true`. |
+| `paused` | `true` | Start Gazebo paused. Use `paused:=false` to start it running and activate controllers without the dashboard button. |
+| `use_rviz` | `true` | Start RViz. Set `use_rviz:=false` to run without it. |
+| `world` | `go2_house_world/worlds/greenquartz_bto.sdf` | Select a different Gazebo world by passing its absolute path. |
+| `world_init_x` | `4.0` | Robot spawn x coordinate in the selected world. |
+| `world_init_y` | `4.0` | Robot spawn y coordinate in the selected world. |
+| `world_init_z` | `0.575` | Robot spawn z coordinate in the selected world. |
+| `world_init_heading` | `0.0` | Robot spawn heading in radians. Choose a valid spawn pose for the selected world. |
+| `slam` | `false` | Use the supplied map by default. Set `slam:=true` to build a map online with SLAM Toolbox. |
+| `map` | `maps/bto_1.yaml` | Saved map used when `slam:=false`; pass an absolute path to use another map. |
+| `params_file` | `params/nav2_go2_params.yaml` | Nav2 and SLAM Toolbox parameters; pass an absolute path to override them. |
+| `use_composition` | `true` | Compose Nav2 nodes. Set `use_composition:=false` to run them as separate processes. |
+
+When selecting another world, also pass `world_name:=<SDF world name>` to the
+dashboard launch so its Start button controls that world.
 
 When using `slam:=true`, save the map from another sourced terminal:
 

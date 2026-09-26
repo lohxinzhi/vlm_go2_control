@@ -2,6 +2,7 @@
 
 import base64
 import json
+import os
 import time
 
 import cv2
@@ -43,11 +44,22 @@ class DescribeSceneServer(Node):
         self.bridge = CvBridge()
         self.frame = None
         self.frame_received_at = None
+        self.client_type = self.declare_parameter(
+            'client_type', 'openai').value.lower()
+        if self.client_type == 'openai':
+            self.client = OpenAI(timeout=30.0)
+            default_model = 'gpt-5.6-luna'
+        elif self.client_type == 'qwen':
+            self.client = OpenAI(
+                api_key=os.environ.get('QWEN_API_KEY'),
+                base_url=os.environ.get('QWEN_BASE_URL'), timeout=30.0)
+            default_model = 'qwen3.5-flash'
+        else:
+            raise ValueError(f'Unsupported client type: {self.client_type}')
         self.vlm_model = self.declare_parameter(
-            'vlm_model', 'gpt-5.6-luna').value
+            'vlm_model', default_model).value
         self.stale_frame_threshold_sec = self.declare_parameter(
             'stale_frame_threshold_sec', 2.0).value
-        self.client = OpenAI(timeout=30.0)
         group = ReentrantCallbackGroup()
         self.create_subscription(
             Image, '/rgb_image', self.on_image, qos_profile_sensor_data,

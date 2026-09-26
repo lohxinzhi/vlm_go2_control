@@ -3,6 +3,7 @@
 import base64
 import json
 import math
+import os
 import time
 from threading import Event, Lock
 
@@ -34,8 +35,19 @@ class ApproachObjectServer(Node):
     def __init__(self, camera):
         super().__init__('approach_object_server')
         self.camera = camera
-        self.client = OpenAI()
-        self.vlm_model = 'gpt-5.6-luna'
+
+        self.client_type = self.declare_parameter(
+            'client_type', 'openai').value.lower()
+        if self.client_type == 'openai':
+            self.client = OpenAI()
+            self.vlm_model = self.declare_parameter(
+                'vlm_model', 'gpt-5.6-luna').value.lower()
+        elif self.client_type == "qwen":
+            self.client = OpenAI(
+                api_key=os.environ.get('QWEN_API_KEY'),
+                base_url=os.environ.get('QWEN_BASE_URL'))
+            self.vlm_model = self.declare_parameter(
+                'vlm_model', 'qwen3.5-flash').value.lower()
         self.stop_requested = Event()
         self.goal_lock = Lock()
         self.busy = False

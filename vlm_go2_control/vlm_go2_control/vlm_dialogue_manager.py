@@ -107,8 +107,19 @@ class VLMDialogueManager(Node):
             'For an impossible or unsafe request, use chat to explain. '
             f'Valid room names: {room_names}. Valid room ids: {room_ids}.')
         self.history = [{'role': 'system', 'content': system}]
-        self.client = OpenAI()
-        self.text_model = 'gpt-5-mini'
+        client_type = self.declare_parameter(
+            'client_type', 'openai').value.lower()
+        if client_type == 'openai':
+            self.client = OpenAI()
+            default_model = 'gpt-5-mini'
+        elif client_type == 'qwen':
+            self.client = OpenAI(
+                api_key=os.environ.get('QWEN_API_KEY'),
+                base_url=os.environ.get('QWEN_BASE_URL'))
+            default_model = 'qwen3.5-flash'
+        else:
+            raise ValueError(f'Unsupported client type: {client_type}')
+        self.text_model = self.declare_parameter('model', default_model).value
         group = ReentrantCallbackGroup()
         self.room_client = ActionClient(
             self, GoToRoom, '/go_to_room', callback_group=group)
