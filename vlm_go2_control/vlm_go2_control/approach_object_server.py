@@ -2,10 +2,13 @@
 
 import base64
 import json
+import math
+import time
 from threading import Event, Lock
 
 import cv2
 from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
 from openai import OpenAI
 from std_srvs.srv import Trigger
 from vision_msgs.msg import Detection2D
@@ -17,6 +20,12 @@ from rclpy.node import Node
 from vlm_go2_interfaces.action import ApproachObject
 
 from vlm_go2_control.vlm_dialogue_manager import Camera
+
+
+SEARCH_SPEED = 0.3  # radians per second, counterclockwise
+SEARCH_STEP = math.radians(30.0)
+# Leave room for stopping after the final command so the turn stays under 360 degrees.
+MAX_SEARCH_ROTATION = 2.0 * math.pi - math.radians(15.0)
 
 
 class ApproachObjectServer(Node):
@@ -32,10 +41,15 @@ class ApproachObjectServer(Node):
         self.busy = False
         self.filter_alpha = 0.25
         self.filtered_cmd = Twist()
+        self.current_yaw = None
+        self.last_odom_received_at = None
         self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.bbox_publisher = self.create_publisher(
             Detection2D, '/ground_bbox', 10)
         group = ReentrantCallbackGroup()
+        self.create_subscription(
+            Odometry, '/odom', self.odom_callback, 10,
+            callback_group=group)
         self.server = ActionServer(
             self, ApproachObject, '/approach_object', self.execute,
             goal_callback=self.accept_goal, cancel_callback=self.cancel_goal,
@@ -74,6 +88,87 @@ class ApproachObjectServer(Node):
         self.filtered_cmd = filtered
         return filtered
 
+    def odom_callback(self, message):
+        """Keep the latest measured yaw for the bounded search turn."""
+        q = message.pose.pose.orientation
+        self.current_yaw = math.atan2(
+            2.0 * (q.w * q.z + q.x * q.y),
+            1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+        self.last_odom_received_at = time.monotonic()
+
+    def canceled(self, goal_handle):
+        return self.stop_requested.is_set() or goal_handle.is_cancel_requested
+
+    def wait_for_new_frame(self, after_time, goal_handle):
+        """Capture an image taken after the robot stops turning."""
+        deadline = time.monotonic() + 2.0
+        while rclpy.ok() and time.monotonic() < deadline:
+            if self.canceled(goal_handle):
+                return None
+            received_at = self.camera.frame_received_at
+            if received_at is not None and received_at > after_time:
+                return self.camera.frame
+            Event().wait(0.05)
+        raise RuntimeError('No new camera frame arrived during the search')
+
+    def search_for_object(self, object_name, goal_handle):
+        """Check new views while turning at most once around the robot's yaw."""
+        if (self.current_yaw is None or self.last_odom_received_at is None or
+                time.monotonic() - self.last_odom_received_at > 1.0):
+            raise RuntimeError('Fresh odometry is required for a bounded search')
+
+        self.filtered_cmd = Twist()
+        self.velocity_publisher.publish(Twist())
+        previous_yaw = self.current_yaw
+        rotation = 0.0
+        while (rotation < MAX_SEARCH_ROTATION - 0.04 and
+               not self.canceled(goal_handle)):
+            # Stop short of each target to allow for controller and robot inertia.
+            target = min(rotation + SEARCH_STEP, MAX_SEARCH_ROTATION)
+            command = Twist()
+            command.angular.z = SEARCH_SPEED
+            deadline = time.monotonic() + 3.0 * SEARCH_STEP / SEARCH_SPEED
+            try:
+                while rotation < target - 0.04 and not self.canceled(goal_handle):
+                    if time.monotonic() > deadline:
+                        raise RuntimeError('Search rotation did not follow odometry')
+                    if (self.last_odom_received_at is None or
+                            time.monotonic() - self.last_odom_received_at > 1.0):
+                        raise RuntimeError('Odometry stopped during search')
+                    self.velocity_publisher.publish(command)
+                    Event().wait(0.05)
+                    yaw = self.current_yaw
+                    change = math.atan2(
+                        math.sin(yaw - previous_yaw),
+                        math.cos(yaw - previous_yaw))
+                    rotation += max(0.0, change)
+                    previous_yaw = yaw
+            finally:
+                self.velocity_publisher.publish(Twist())
+            if self.canceled(goal_handle):
+                return None
+
+            stopped_at = time.monotonic()
+            frame = self.wait_for_new_frame(stopped_at, goal_handle)
+            if frame is None:
+                return None
+            goal_handle.publish_feedback(
+                ApproachObject.Feedback(status='Searching for object'))
+            grounding = self.ask_vlm(object_name, frame)
+            if self.canceled(goal_handle):
+                return None
+            if grounding.get('found'):
+                return grounding, frame
+
+            # Include any residual rotation that occurred while the robot stopped.
+            yaw = self.current_yaw
+            change = math.atan2(
+                math.sin(yaw - previous_yaw),
+                math.cos(yaw - previous_yaw))
+            rotation += max(0.0, change)
+            previous_yaw = yaw
+        return None
+
     def ask_vlm(self, object_name, frame):
         encoded_ok, encoded_frame = cv2.imencode('.jpg', frame)
         if not encoded_ok:
@@ -107,6 +202,7 @@ class ApproachObjectServer(Node):
     def execute(self, goal_handle):
         result = ApproachObject.Result()
         object_name = goal_handle.request.object_name
+        searched = False
         try:
             for _ in range(120):
                 if self.stop_requested.is_set() or goal_handle.is_cancel_requested:
@@ -125,8 +221,23 @@ class ApproachObjectServer(Node):
                     goal_handle.canceled()
                     return result
                 if not grounding.get('found'):
+                    self.filtered_cmd = Twist()
                     self.velocity_publisher.publish(Twist())
-                    continue
+                    if searched:
+                        break
+                    searched = True
+                    search_result = self.search_for_object(
+                        object_name, goal_handle)
+                    if self.canceled(goal_handle):
+                        result.message = f'Approach to {object_name} was canceled.'
+                        goal_handle.canceled()
+                        return result
+                    if search_result is None:
+                        break
+                    grounding, frame = search_result
+                    distance = self.camera.front_distance
+                    if distance is None:
+                        continue
                 coordinates = grounding.get('bbox', [])
                 if len(coordinates) != 4:
                     raise ValueError('VLM returned an invalid bounding box')

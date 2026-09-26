@@ -4,6 +4,7 @@ import json
 import math
 import os
 import sys
+import time
 from threading import Event, Lock
 
 from ament_index_python.packages import get_package_share_directory
@@ -28,6 +29,7 @@ class Camera(Node):
     def __init__(self):
         super().__init__('cam_buffer')
         self.frame = None
+        self.frame_received_at = None
         self.scan = None
         self.front_distance = None
         self.bridge = CvBridge()
@@ -38,6 +40,7 @@ class Camera(Node):
 
     def cam_cb(self, msg):
         self.frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+        self.frame_received_at = time.monotonic()
 
     def scan_cb(self, msg):
         self.scan = msg
