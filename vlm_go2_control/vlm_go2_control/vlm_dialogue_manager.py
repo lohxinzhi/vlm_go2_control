@@ -5,7 +5,8 @@ import math
 import os
 import sys
 import time
-from threading import Event, Lock
+from queue import Queue
+from threading import Event, Lock, Thread
 
 from ament_index_python.packages import get_package_share_directory
 from cv_bridge import CvBridge
@@ -118,14 +119,20 @@ class VLMDialogueManager(Node):
         self.describe_client = self.create_client(
             DescribeScene, '/describe_scene', callback_group=group)
         self.actions_publisher = self.create_publisher(String, '/vlm/actions', 10)
-        self.request_lock = Lock()
+        self.request_queue = Queue()
+        self.history_lock = Lock()
+        self.motion_lock = Lock()
+        self.plan_lock = Lock()
+        self.active_plan = None
+        self.active_goal = None
+        Thread(target=self.request_worker, daemon=True).start()
         self.create_subscription(
             String, '/vlm/user_request', self.request_cb, 10,
             callback_group=group)
         use_console = self.declare_parameter(
             'use_console_input', sys.stdin.isatty()).value
         if use_console:
-            self.create_timer(0.2, self.timer_cb)
+            Thread(target=self.console_worker, daemon=True).start()
 
     def room_id_from_name(self, room_name):
         normalized = ' '.join(room_name.split()).casefold()
@@ -134,18 +141,33 @@ class VLMDialogueManager(Node):
                 return int(room_id)
         return None
 
-    def send_action(self, client, goal):
+    def send_action(self, client, goal, cancel_event=None):
         if not client.wait_for_server(timeout_sec=5.0):
             return False, 'Action server unavailable.'
+        if cancel_event is not None and cancel_event.is_set():
+            return False, 'Action canceled.'
         goal_handle = wait_for_future(client.send_goal_async(goal))
         if goal_handle is None or not goal_handle.accepted:
             return False, 'Action goal rejected.'
-        result = wait_for_future(goal_handle.get_result_async())
+        with self.plan_lock:
+            self.active_goal = goal_handle
+        result_future = goal_handle.get_result_async()
+        cancellation_sent = False
+        while rclpy.ok() and not result_future.done():
+            if (cancel_event is not None and cancel_event.is_set()
+                    and not cancellation_sent):
+                goal_handle.cancel_goal_async()
+                cancellation_sent = True
+            Event().wait(0.1)
+        with self.plan_lock:
+            if self.active_goal is goal_handle:
+                self.active_goal = None
+        result = result_future.result() if result_future.done() else None
         if result is None:
             return False, 'Action did not return a result.'
         return result.result.success, result.result.message
 
-    def execute_command(self, command):
+    def execute_command(self, command, cancel_event=None):
         action = command.get('action')
         if action in ('goto_room', 'goto_room_name'):
             if action == 'goto_room_name':
@@ -160,7 +182,7 @@ class VLMDialogueManager(Node):
             goal = GoToRoom.Goal()
             goal.room_id = int(room_id)
             print(f"Robot: Going to {self.rooms[room_id]['name']}.", flush=True)
-            success, message = self.send_action(self.room_client, goal)
+            success, message = self.send_action(self.room_client, goal, cancel_event)
             return message, success
         if action == 'approach':
             object_name = command.get('object', '')
@@ -169,7 +191,7 @@ class VLMDialogueManager(Node):
             goal = ApproachObject.Goal()
             goal.object_name = object_name
             print(f'Robot: Approaching the {object_name}.', flush=True)
-            success, message = self.send_action(self.approach_client, goal)
+            success, message = self.send_action(self.approach_client, goal, cancel_event)
             return message, success
         if action == 'describe':
             question = command.get('question', '')
@@ -199,51 +221,114 @@ class VLMDialogueManager(Node):
             return str(command.get('reply', '')), True
         return 'Invalid command.', False
 
-    def timer_cb(self):
-        try:
-            self.process_request(input('You: ').strip())
-        except EOFError:
-            pass
+    def console_worker(self):
+        while rclpy.ok():
+            try:
+                self.process_request(input('You: ').strip())
+            except EOFError:
+                return
 
     def request_cb(self, message):
         self.process_request(message.data.strip())
 
     def process_request(self, user):
-        if not user:
-            return
-        # Keep dialogue history and action sequences in request order.
-        with self.request_lock:
+        if user:
+            self.request_queue.put(user)
+
+    def request_worker(self):
+        while rclpy.ok():
+            user = self.request_queue.get()
             self.run_request(user)
 
+    def validate_command(self, command):
+        if not isinstance(command, dict):
+            return False
+        action = command.get('action')
+        if action == 'goto_room':
+            return isinstance(command.get('room'), int) and command['room'] in self.rooms
+        if action == 'goto_room_name':
+            name = command.get('room_name')
+            return isinstance(name, str) and self.room_id_from_name(name) is not None
+        if action == 'approach':
+            return isinstance(command.get('object'), str) and bool(command['object'].strip())
+        if action == 'describe':
+            question = command.get('question', '')
+            mode = command.get('mode', 'vqa' if question else 'describe')
+            return mode == 'describe' or (
+                mode == 'vqa' and isinstance(question, str) and
+                bool(question.strip()))
+        return action in ('stop', 'chat')
+
+    def report_reply(self, reply):
+        print('Robot:', reply, flush=True)
+        with self.history_lock:
+            self.history.append({'role': 'assistant', 'content': reply})
+
+    def execute_plan(self, commands, cancel_event):
+        # Wait for the previous action server to finish cancellation before
+        # sending another motion goal to either server.
+        with self.motion_lock:
+            replies = []
+            for command in commands:
+                if cancel_event.is_set():
+                    break
+                reply, success = self.execute_command(command, cancel_event)
+                replies.append(reply)
+                if not success or command['action'] == 'stop':
+                    break
+            if not cancel_event.is_set() and replies:
+                self.report_reply(' '.join(replies))
+
+    def execute_non_motion(self, commands):
+        replies = []
+        for command in commands:
+            reply, success = self.execute_command(command)
+            replies.append(reply)
+            if not success or command['action'] == 'stop':
+                break
+        self.report_reply(' '.join(replies))
+
     def run_request(self, user):
-        self.history.append({'role': 'user', 'content': user})
+        with self.history_lock:
+            self.history.append({'role': 'user', 'content': user})
+            messages = list(self.history)
         try:
             output = self.client.chat.completions.create(
-                model=self.text_model, messages=self.history)
+                model=self.text_model, messages=messages)
             plan = json.loads(output.choices[0].message.content)
-            if not isinstance(plan, dict) or not isinstance(plan.get('actions'), list):
+            if (not isinstance(plan, dict) or
+                    not isinstance(plan.get('actions'), list) or
+                    not plan['actions']):
                 raise ValueError('Expected an actions array')
+            if not all(self.validate_command(command) for command in plan['actions']):
+                raise ValueError('Invalid command in action plan')
             message = String()
             message.data = json.dumps(plan)
             self.actions_publisher.publish(message)
-            self.history.append({'role': 'assistant', 'content': message.data})
-            replies = []
-            for command in plan['actions']:
-                if not isinstance(command, dict):
-                    replies.append('Invalid command.')
-                    break
-                reply, success = self.execute_command(command)
-                replies.append(reply)
-                if not success or command.get('action') == 'stop':
-                    break
-            reply = ' '.join(replies)
+            with self.history_lock:
+                self.history.append({'role': 'assistant', 'content': message.data})
+            commands = plan['actions']
+            changes_motion = any(command['action'] in
+                                 ('goto_room', 'goto_room_name', 'approach', 'stop')
+                                 for command in commands)
+            if changes_motion:
+                with self.plan_lock:
+                    if self.active_plan is not None:
+                        self.active_plan.set()
+                    cancel_event = Event()
+                    self.active_plan = cancel_event
+                Thread(target=self.execute_plan, args=(commands, cancel_event),
+                       daemon=True).start()
+            else:
+                Thread(target=self.execute_non_motion, args=(commands,),
+                       daemon=True).start()
+            return
         except (ValueError, KeyError, TypeError) as error:
             reply = f'Could not interpret the action plan: {error}'
         except Exception as error:
             self.get_logger().error(f'Dialogue failed: {error}')
             reply = 'Sorry, I could not complete that request.'
-        print('Robot:', reply, flush=True)
-        self.history.append({'role': 'assistant', 'content': reply})
+        self.report_reply(reply)
 
 
 def main():
