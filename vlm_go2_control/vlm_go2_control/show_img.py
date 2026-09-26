@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import rclpy
 from cv_bridge import CvBridge, CvBridgeError
@@ -11,6 +13,7 @@ from vision_msgs.msg import Detection2D
 INACTIVE_ARROW_COLOR = (100, 140, 100)  # Muted green in OpenCV BGR order.
 ACTIVE_ARROW_COLOR = (0, 255, 0)
 VELOCITY_DEADBAND = 1e-3
+DETECTION_DISPLAY_SECONDS = 3.0
 
 
 def draw_velocity_arrows(frame, command):
@@ -67,6 +70,7 @@ class ImageAndBoundingBoxViewer(Node):
         self.create_subscription(Twist, '/cmd_vel', self.velocity_callback, 10)
 
         self.latest_detection = None
+        self.latest_detection_received_at = None
         self.front_distance = None
         self.latest_velocity = Twist()
         self.get_logger().info(
@@ -74,8 +78,21 @@ class ImageAndBoundingBoxViewer(Node):
             f'{self.bounding_box_topic}')
 
     def bounding_box_callback(self, message: Detection2D):
-        """Store the newest detection for the next camera frame."""
+        """Store the newest detection and restart its display timeout."""
         self.latest_detection = message
+        self.latest_detection_received_at = time.monotonic()
+
+    def visible_detection(self):
+        """Return the current detection only during its display window."""
+        if self.latest_detection is None:
+            return None
+        if (self.latest_detection_received_at is None or
+                time.monotonic() - self.latest_detection_received_at >=
+                DETECTION_DISPLAY_SECONDS):
+            self.latest_detection = None
+            self.latest_detection_received_at = None
+            return None
+        return self.latest_detection
 
     def front_distance_callback(self, message: Float32):
         """Store the latest forward distance in meters."""
@@ -93,8 +110,9 @@ class ImageAndBoundingBoxViewer(Node):
             self.get_logger().error(f'Could not convert image: {error}')
             return
 
-        if self.latest_detection is not None:
-            self.draw_detection(frame, self.latest_detection)
+        detection = self.visible_detection()
+        if detection is not None:
+            self.draw_detection(frame, detection)
         draw_velocity_arrows(frame, self.latest_velocity)
 
         cv2.imshow(self.window_name, frame)
