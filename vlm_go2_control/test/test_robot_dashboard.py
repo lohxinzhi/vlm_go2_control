@@ -11,6 +11,7 @@ import pytest
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from ros_gz_interfaces.srv import ControlWorld
 from std_msgs.msg import String
 from std_srvs.srv import SetBool
 
@@ -23,6 +24,7 @@ def dashboard():
     node = RobotDashboard()
     peer = Node('dashboard_test_peer')
     requests = []
+    world_requests = []
     peer.create_subscription(
         String, '/vlm/user_request', lambda msg: requests.append(msg.data), 10)
     replies = peer.create_publisher(String, '/vlm/reply', 10)
@@ -32,6 +34,13 @@ def dashboard():
         return response
 
     peer.create_service(SetBool, '/vlm/manual_control', manual)
+
+    def control_world(request, response):
+        world_requests.append(request.world_control.pause)
+        response.success = True
+        return response
+
+    peer.create_service(ControlWorld, '/world/greenquartz_bto/control', control_world)
     executor = MultiThreadedExecutor(num_threads=3)
     executor.add_node(node)
     executor.add_node(peer)
@@ -42,7 +51,7 @@ def dashboard():
         while node.request_publisher.get_subscription_count() < 2:
             assert time.monotonic() < deadline, 'ROS discovery timed out'
             time.sleep(0.02)
-        yield node, requests, replies
+        yield node, requests, replies, world_requests
     finally:
         node.destroy_node()
         executor.shutdown()
@@ -65,7 +74,7 @@ def request(node, method, path, data=None, authorized=True):
 
 def test_camera_and_conversation_http(dashboard):
     """Both images render and conversation messages make a ROS round trip."""
-    node, prompts, replies = dashboard
+    node, prompts, replies, _ = dashboard
     assert request(node, 'GET', '/')[0] == 200
     assert request(node, 'GET', '/camera.jpg')[0] == 503
     frame = np.zeros((240, 320, 3), dtype=np.uint8)
@@ -92,10 +101,11 @@ def test_camera_and_conversation_http(dashboard):
 
 def test_teleop_requires_control_and_expires(dashboard):
     """Commands require control, expire, and cannot override a newer stop."""
-    node, _, _ = dashboard
+    node, _, _, _ = dashboard
     command = {'direction': 'forward', 'client_id': 'test', 'sequence': 0}
     assert request(node, 'POST', '/api/teleop', command, authorized=False)[0] == 403
     assert request(node, 'POST', '/api/teleop', command)[0] == 409
+    assert request(node, 'POST', '/api/simulation/start', {})[0] == 200
     assert request(node, 'POST', '/api/manual', {'enabled': True})[0] == 200
     command['sequence'] = 1
     assert request(node, 'POST', '/api/teleop', command)[0] == 200
@@ -110,3 +120,32 @@ def test_teleop_requires_control_and_expires(dashboard):
     assert not node.teleop_active
     assert request(node, 'POST', '/api/manual', {'enabled': False})[0] == 200
     assert not node.manual_enabled
+
+
+def test_simulation_start_pause_resume_from_dashboard(dashboard):
+    """Dashboard commands change Gazebo state and stop motion on pause."""
+    node, _, _, world_requests = dashboard
+    assert node.dashboard_state()['simulation_paused']
+    assert request(node, 'POST', '/api/simulation/start', {}, authorized=False)[0] == 403
+    assert request(node, 'POST', '/api/simulation/start', {})[0] == 200
+    assert world_requests == [False]
+    assert node.dashboard_state()['simulation_started']
+    assert not node.dashboard_state()['simulation_paused']
+    assert request(node, 'POST', '/api/simulation/start', {})[0] == 200
+    assert world_requests == [False]
+    assert request(node, 'POST', '/api/manual', {'enabled': True})[0] == 200
+    command = {'direction': 'forward', 'client_id': 'pause-test', 'sequence': 0}
+    assert request(node, 'POST', '/api/teleop', command)[0] == 200
+    assert node.teleop_active
+    assert request(node, 'POST', '/api/simulation/pause', {}, authorized=False)[0] == 403
+    assert request(node, 'POST', '/api/simulation/pause', {})[0] == 200
+    assert world_requests == [False, True]
+    assert node.dashboard_state()['simulation_paused']
+    assert not node.teleop_active
+    command['sequence'] = 1
+    assert request(node, 'POST', '/api/teleop', command)[0] == 409
+    assert request(node, 'POST', '/api/simulation/pause', {})[0] == 200
+    assert world_requests == [False, True]
+    assert request(node, 'POST', '/api/simulation/start', {})[0] == 200
+    assert world_requests == [False, True, False]
+    assert not node.dashboard_state()['simulation_paused']

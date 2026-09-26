@@ -14,6 +14,10 @@
 <p id="error" role="alert"></p>
 <main>
 <section aria-label="Robot views and controls">
+  <section class="card controls" aria-label="Simulation control">
+    <div><h2>Simulation</h2><p id="simulation-status">Waiting for the world-control bridge…</p></div>
+    <button id="simulation-control" class="primary" disabled>Start simulation</button>
+  </section>
   <div class="views">
     <article class="card"><div class="card-title">Robot camera <span class="badge" id="camera-status">WAITING</span></div><div class="camera"><span class="placeholder" id="camera-placeholder">Waiting for the robot camera…</span><img id="camera" alt="Live robot camera with object boxes and velocity arrows"></div></article>
     <article class="card"><div class="card-title">Top-down view <span class="badge" id="top-down-status">WAITING</span></div><div class="camera"><span class="placeholder" id="top-down-placeholder">Waiting for the top-down camera…</span><img id="top-down" alt="Live top-down view of the scene"></div></article>
@@ -42,18 +46,23 @@
 const token='__CONTROL_TOKEN__';
 const clientId=crypto.randomUUID();let sequence=0;
 const $=id=>document.getElementById(id);
-let manual=false,held=null,lastMessage=0,commandBusy=false,manualBusy=false;
+let manual=false,held=null,lastMessage=0,commandBusy=false,manualBusy=false,simulationBusy=false;
+let simulationStarted=false,simulationPaused=true,simulationReady=false;
 function error(text){$('error').textContent=text;}
 async function post(path,data){
   if(path==='/api/teleop')data={...data,client_id:clientId,sequence:++sequence};
   const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Control-Token':token},body:JSON.stringify(data),signal:AbortSignal.timeout(12000)});
   const body=await response.json(); if(!response.ok)throw new Error(body.error||'Request failed.'); return body;
 }
-function setManual(enabled){manual=enabled;$('manual').textContent=enabled?'Release manual control':'Take manual control';$('control-status').textContent=enabled?'Manual control active. Release it before asking Go2 to move.':'Dialogue controls robot motion.';document.querySelectorAll('.pad button').forEach(b=>b.disabled=!enabled);}
+function updateDriveButtons(){document.querySelectorAll('.pad button').forEach(b=>b.disabled=!manual||simulationPaused);}
+function setManual(enabled){manual=enabled;$('manual').textContent=enabled?'Release manual control':'Take manual control';$('control-status').textContent=enabled?'Manual control active. Release it before asking Go2 to move.':'Dialogue controls robot motion.';updateDriveButtons();}
+function renderSimulation(){const button=$('simulation-control');button.textContent=simulationPaused?(simulationStarted?'Resume simulation':'Start simulation'):'Pause simulation';button.disabled=simulationBusy||!simulationReady;$('simulation-status').textContent=!simulationReady&&simulationPaused?'Waiting for the world-control bridge…':simulationPaused?(simulationStarted?'Simulation paused. Physics and simulation time are stopped.':'Start physics and simulation time after the Gazebo world loads.'):'Physics and simulation time are running.';updateDriveButtons();}
 async function refreshState(){
   try{
     const response=await fetch('/api/state',{signal:AbortSignal.timeout(2500)});if(!response.ok)throw new Error('Disconnected');const state=await response.json();
     $('connection').textContent='Dashboard connected';
+    if(!simulationBusy){simulationStarted=!!state.simulation_started;simulationPaused=!!state.simulation_paused;}
+    simulationReady=!!state.simulation_ready;renderSimulation();
     if(!manualBusy)setManual(state.manual);
     $('dialogue-status').textContent=state.dialogue_online?'ONLINE':'OFFLINE';$('dialogue-status').classList.toggle('live',state.dialogue_online);
     for(const name of ['camera','top-down']){const live=!!state.cameras[name];$(name+'-status').textContent=live?'LIVE':'WAITING';$(name+'-status').classList.toggle('live',live);}
@@ -69,10 +78,11 @@ async function refreshCamera(name){
   catch(e){}setTimeout(()=>refreshCamera(name),150);
 }
 $('chat-form').addEventListener('submit',async event=>{event.preventDefault();const input=$('prompt');const text=input.value.trim();if(!text)return;$('send').disabled=true;try{await post('/api/chat',{text});input.value='';error('');}catch(e){error(e.message);}finally{$('send').disabled=false;input.focus();}});
+$('simulation-control').addEventListener('click',async()=>{const pause=!simulationPaused;simulationBusy=true;if(pause){held=null;document.querySelectorAll('.direction').forEach(b=>b.classList.remove('active'));}renderSimulation();try{await post(pause?'/api/simulation/pause':'/api/simulation/start',{});simulationPaused=pause;if(!pause)simulationStarted=true;error('');}catch(e){error(e.message);}finally{simulationBusy=false;renderSimulation();}});
 $('prompt').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();if(!$('send').disabled)$('chat-form').requestSubmit();}});
 async function stop(){held=null;document.querySelectorAll('.direction').forEach(b=>b.classList.remove('active'));try{await post('/api/teleop',{direction:'stop'});}catch(e){error(e.message);}}
 async function commandTick(){if(commandBusy||!held||!manual)return;commandBusy=true;try{await post('/api/teleop',{direction:held});}catch(e){held=null;error(e.message);}finally{commandBusy=false;}}
-function start(direction){if(!manual||manualBusy)return;held=direction;document.querySelectorAll('.direction').forEach(b=>b.classList.toggle('active',b.dataset.direction===direction));commandTick();}
+function start(direction){if(!manual||manualBusy||simulationPaused)return;held=direction;document.querySelectorAll('.direction').forEach(b=>b.classList.toggle('active',b.dataset.direction===direction));commandTick();}
 document.querySelectorAll('.direction').forEach(button=>{button.addEventListener('pointerdown',event=>{event.preventDefault();button.setPointerCapture(event.pointerId);start(button.dataset.direction);});button.addEventListener('pointerup',stop);button.addEventListener('pointercancel',stop);button.addEventListener('lostpointercapture',()=>{if(held)stop();});});
 $('stop').addEventListener('click',stop);
 $('manual').addEventListener('click',async()=>{manualBusy=true;$('manual').disabled=true;try{await stop();await post('/api/manual',{enabled:!manual});setManual(!manual);error('');}catch(e){error(e.message);}finally{manualBusy=false;$('manual').disabled=false;}});

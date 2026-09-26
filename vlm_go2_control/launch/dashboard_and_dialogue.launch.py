@@ -18,11 +18,15 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'http_port', default_value='8080',
             description='Local HTTP port for the robot dashboard.'),
+        DeclareLaunchArgument(
+            'world_name', default_value='greenquartz_bto',
+            description='Gazebo world controlled by the dashboard.'),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(dialogue_launch),
             launch_arguments={
                 'start_dialogue': 'true',
                 'http_port': LaunchConfiguration('http_port'),
+                'world_name': LaunchConfiguration('world_name'),
             }.items(),
         ),
     ])

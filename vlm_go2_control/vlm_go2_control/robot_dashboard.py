@@ -11,6 +11,7 @@ from ament_index_python.packages import get_package_share_directory
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
+from ros_gz_interfaces.srv import ControlWorld
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float32, String
 from std_srvs.srv import SetBool
@@ -68,6 +69,9 @@ class RobotDashboard(Node):
         self.chat_history = deque(maxlen=200)
         self.message_id = 0
         self.manual_enabled = False
+        self.simulation_started = False
+        self.simulation_paused = True
+        self.simulation_pausing = False
         self.teleop_command = Twist()
         self.teleop_deadline = 0.0
         self.teleop_active = False
@@ -79,6 +83,9 @@ class RobotDashboard(Node):
         self.command_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.request_publisher = self.create_publisher(String, '/vlm/user_request', 10)
         self.manual_client = self.create_client(SetBool, '/vlm/manual_control')
+        world_name = self.declare_parameter('world_name', 'greenquartz_bto').value
+        self.world_control_client = self.create_client(
+            ControlWorld, f'/world/{world_name}/control')
 
         self.image_subscription = self.create_subscription(
             Image, self.image_topic, self.image_callback, qos_profile_sensor_data)
@@ -124,6 +131,9 @@ class RobotDashboard(Node):
     def dashboard_state(self):
         with self.state_lock:
             return dict(messages=list(self.chat_history), manual=self.manual_enabled,
+                        simulation_started=self.simulation_started,
+                        simulation_paused=self.simulation_paused,
+                        simulation_ready=self.world_control_client.service_is_ready(),
                         dialogue_online=self.request_publisher.get_subscription_count() > 1,
                         cameras={name: time.monotonic() - stamp < 3.0
                                  for name, stamp in self.frame_times.items()})
@@ -134,6 +144,49 @@ class RobotDashboard(Node):
         if self.request_publisher.get_subscription_count() <= 1:
             raise RuntimeError('The dialogue manager is not connected.')
         self.request_publisher.publish(String(data=text.strip()))
+
+    def start_simulation(self):
+        """Resume Gazebo physics and its simulation clock."""
+        self.set_simulation_paused(False)
+
+    def pause_simulation(self):
+        """Pause Gazebo physics and its simulation clock."""
+        self.set_simulation_paused(True)
+
+    def set_simulation_paused(self, paused):
+        """Send a world-control request and update state only when it succeeds."""
+        with self.control_lock:
+            if paused == self.simulation_paused:
+                return
+            if not self.world_control_client.wait_for_service(timeout_sec=1.0):
+                raise RuntimeError('Gazebo world control is not available yet.')
+            if paused:
+                # CHAMP holds the last velocity command across a physics pause.
+                with self.state_lock:
+                    self.simulation_pausing = True
+                self.stop_teleop()
+            try:
+                request = ControlWorld.Request()
+                request.world_control.pause = paused
+                ready = Event()
+                future = self.world_control_client.call_async(request)
+                future.add_done_callback(lambda _: ready.set())
+                if not ready.wait(10.0):
+                    raise RuntimeError('Timed out waiting for Gazebo. Try again.')
+                try:
+                    response = future.result()
+                except Exception as error:
+                    raise RuntimeError('Gazebo world control failed.') from error
+                if response is None or not response.success:
+                    raise RuntimeError('Gazebo did not change the simulation state.')
+                with self.state_lock:
+                    self.simulation_paused = paused
+                    if not paused:
+                        self.simulation_started = True
+            finally:
+                if paused:
+                    with self.state_lock:
+                        self.simulation_pausing = False
 
     def set_manual_control(self, enabled):
         """Wait for autonomous motion to stop before enabling manual commands."""
@@ -180,6 +233,8 @@ class RobotDashboard(Node):
                 return
             if not self.manual_enabled:
                 raise RuntimeError('Enable manual control first.')
+            if self.simulation_paused or self.simulation_pausing:
+                raise RuntimeError('Resume the simulation before driving.')
             linear, angular = directions[direction]
             self.teleop_command = Twist()
             self.teleop_command.linear.x = linear

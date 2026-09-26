@@ -10,7 +10,11 @@ ros2 launch vlm_go2_control dashboard_and_dialogue.launch.py
 
 Open **http://127.0.0.1:8080** in a browser on the same machine. This launch starts
 the dialogue manager, action/service servers, dashboard, and
-`go2_house_world/top_down_camera_bridge.launch.py`. The OpenAI key must be available
+`go2_house_world/top_down_camera_bridge.launch.py`, plus the Gazebo world-control
+bridge. When using `go2_sim_nav2_launch.py`, click **Start simulation** to resume
+physics and simulation time before navigating. The button then switches to
+**Pause simulation** and **Resume simulation**. Pausing stops active dashboard
+velocity commands. The OpenAI key must be available
 to the dialogue and perception nodes as before.
 
 If the dialogue manager and action servers are already running, launch only the
@@ -20,7 +24,9 @@ dashboard and top-down bridge:
 ros2 launch vlm_go2_control robot_dashboard.launch.py
 ```
 
-Use `http_port:=8081` on either launch command to choose another port. The new
+Use `http_port:=8081` on either launch command to choose another port. If the
+simulation uses a different SDF world, also set `world_name:=<SDF world name>`
+on the dashboard launch. The new
 node/executable is `robot_dashboard`; `show_img` remains an executable alias.
 
 The robot camera uses `/rgb_image`, with the existing velocity arrows and

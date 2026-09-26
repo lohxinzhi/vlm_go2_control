@@ -41,6 +41,7 @@ def generate_launch_description():
     ]
     defaults = {
         'use_sim_time': 'true', 'gui': 'true', 'robot_name': 'go2',
+        'paused': 'false',
         # 'world': os.path.join(description_dir, 'worlds', 'TIbuilding.sdf'),
         'world': os.path.join(world_dir, 'worlds', 'greenquartz_bto.sdf'),
         'world_init_x': '0.0', 'world_init_y': '0.0',
@@ -59,7 +60,10 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(os.path.join(
                 get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')),
             launch_arguments={'gz_args': [
-                '"', LaunchConfiguration('world'), '" -r',
+                '"', LaunchConfiguration('world'), '"',
+                PythonExpression([
+                    "' ' if '", LaunchConfiguration('paused'),
+                    "'.lower() == 'true' else ' -r'"]),
                 PythonExpression([
                     "' ' if '", LaunchConfiguration('gui'),
                     "'.lower() == 'true' else ' -s'"]),

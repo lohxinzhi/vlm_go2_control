@@ -79,8 +79,10 @@ source install/setup.bash
 ros2 launch vlm_go2_control go2_sim_nav2_launch.py
 ```
 
-Wait for the controllers and Nav2 to activate, then use RViz's Nav2 Goal tool
-to navigate. The default uses the included `maps/bto_1.yaml` with AMCL. Start
+Gazebo starts paused, so physics and `/clock` do not advance yet. Start the
+dashboard below and click **Start simulation** when ready. Then wait for the
+controllers and Nav2 to activate and use RViz's Nav2 Goal tool to navigate.
+The default uses the included `maps/bto_1.yaml` with AMCL. Start
 online mapping with `slam:=true`; mapping continues while the robot moves.
 This launch does not perform autonomous frontier exploration.
 
@@ -98,7 +100,10 @@ ros2 launch vlm_go2_control dashboard_and_dialogue.launch.py
 ```
 
 Open <http://127.0.0.1:8080> on the same machine. The launch also starts the
-overhead camera bridge. Use the conversation panel for VLM requests. To drive
+overhead camera and Gazebo world-control bridges. Click **Start simulation** to
+resume physics and simulation time. The button then changes to **Pause simulation**;
+click it to stop physics and simulation time, then **Resume simulation** to continue.
+Use the conversation panel for VLM requests. To drive
 with the dashboard, click **Take manual control**; click **Release manual control**
 before requesting robot motion through dialogue again. If you only need the
 camera views and dashboard, run
@@ -109,10 +114,12 @@ for control details. Do not start both dashboard launch files together.
 Simulation and navigation options:
 
 - `gui:=true`: show the Gazebo GUI (off by default).
+- `paused:=false`: start Gazebo running immediately without the dashboard button.
 - `use_rviz:=false`: run without RViz.
 - `world:=/absolute/path/to/world.sdf`: select another world.
   Set `world_init_x`, `world_init_y`, `world_init_z`, and `world_init_heading`
-  to a valid pose for that world.
+  to a valid pose for that world. Pass `world_name:=<SDF world name>` to the
+  dashboard launch so its Start button controls the selected world.
 - `slam:=true`: build a map online with SLAM Toolbox.
 - `map:=/absolute/path/to/map.yaml`: use another saved map with the default
   `slam:=false` mode.

@@ -37,6 +37,7 @@ def generate_launch_description():
             os.path.join(world_dir, 'worlds', 'greenquartz_bto.sdf'),
             'Gazebo world file'),
         'gui': ('false', 'Start the Gazebo GUI when true'),
+        'paused': ('true', 'Start Gazebo with physics and simulation time paused'),
         'robot_name': ('go2', 'Gazebo entity name'),
         'world_init_x': ('4.0', 'Spawn x'),
         'world_init_y': ('4.0', 'Spawn y'),
@@ -60,7 +61,7 @@ def generate_launch_description():
             os.path.join(package_dir, 'launch', 'go2_simulation_launch.py')),
         launch_arguments={
             name: LaunchConfiguration(name) for name in (
-                'use_sim_time', 'world', 'gui', 'robot_name',
+                'use_sim_time', 'world', 'gui', 'paused', 'robot_name',
                 'world_init_x', 'world_init_y', 'world_init_z', 'world_init_heading')
         }.items(),
     ))

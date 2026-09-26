@@ -69,6 +69,10 @@ class DashboardRequestHandler(BaseHTTPRequestHandler):
             path = urlsplit(self.path).path
             if path == '/api/chat':
                 self.server.node.send_chat(data.get('text'))
+            elif path == '/api/simulation/start':
+                self.server.node.start_simulation()
+            elif path == '/api/simulation/pause':
+                self.server.node.pause_simulation()
             elif path == '/api/manual':
                 self.server.node.set_manual_control(data.get('enabled'))
             elif path == '/api/teleop':
