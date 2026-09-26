@@ -11,6 +11,7 @@ import cv2
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from openai import OpenAI
+from rcl_interfaces.msg import ParameterDescriptor
 from std_srvs.srv import Trigger
 from vision_msgs.msg import Detection2D
 
@@ -48,6 +49,9 @@ class ApproachObjectServer(Node):
                 base_url=os.environ.get('QWEN_BASE_URL'))
             self.vlm_model = self.declare_parameter(
                 'vlm_model', 'qwen3.5-flash').value.lower()
+        self.declare_parameter('model_in_use', self.vlm_model,
+                               ParameterDescriptor(read_only=True),
+                               ignore_override=True)
         self.stop_requested = Event()
         self.goal_lock = Lock()
         self.busy = False

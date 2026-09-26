@@ -11,6 +11,7 @@ from threading import Event, Lock, Thread
 from ament_index_python.packages import get_package_share_directory
 from cv_bridge import CvBridge
 from openai import OpenAI
+from rcl_interfaces.msg import ParameterDescriptor
 from sensor_msgs.msg import Image, LaserScan
 from std_msgs.msg import Float32, String
 from std_srvs.srv import SetBool, Trigger
@@ -120,6 +121,9 @@ class VLMDialogueManager(Node):
         else:
             raise ValueError(f'Unsupported client type: {client_type}')
         self.text_model = self.declare_parameter('model', default_model).value
+        self.declare_parameter('model_in_use', self.text_model,
+                               ParameterDescriptor(read_only=True),
+                               ignore_override=True)
         group = ReentrantCallbackGroup()
         self.room_client = ActionClient(
             self, GoToRoom, '/go_to_room', callback_group=group)

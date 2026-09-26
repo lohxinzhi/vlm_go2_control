@@ -11,6 +11,8 @@ from ament_index_python.packages import get_package_share_directory
 from controller_manager_msgs.srv import ListControllers, SwitchController
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
+from rcl_interfaces.msg import ParameterType
+from rcl_interfaces.srv import GetParameters
 from rclpy.duration import Duration
 from rclpy.node import Node
 from ros_gz_interfaces.srv import ControlWorld
@@ -28,6 +30,8 @@ ACTIVE_ARROW_COLOR = (0, 255, 0)
 VELOCITY_DEADBAND = 1e-3
 DETECTION_DISPLAY_SECONDS = 3.0
 REQUIRED_CONTROLLERS = ('joint_states_controller', 'joint_group_effort_controller')
+MODEL_NODES = ('vlm_dialogue_manager', 'describe_scene_server',
+               'approach_object_server')
 
 
 def draw_velocity_arrows(frame, command):
@@ -93,6 +97,11 @@ class RobotDashboard(Node):
             ListControllers, '/controller_manager/list_controllers')
         self.controller_switch_client = self.create_client(
             SwitchController, '/controller_manager/switch_controller')
+        self.model_clients = {
+            name: self.create_client(GetParameters, f'/{name}/get_parameters')
+            for name in MODEL_NODES}
+        self.node_models = {name: None for name in MODEL_NODES}
+        self.model_requests = {}
 
         self.image_subscription = self.create_subscription(
             Image, self.image_topic, self.image_callback, qos_profile_sensor_data)
@@ -121,6 +130,7 @@ class RobotDashboard(Node):
         self.front_distance = None
         self.latest_velocity = Twist()
         self.create_timer(0.05, self.publish_teleop)
+        self.create_timer(1.0, self.refresh_models)
         host = self.declare_parameter('http_host', '127.0.0.1').value
         port = self.declare_parameter('http_port', 8080).value
         page = Path(get_package_share_directory('vlm_go2_control')) / 'web/robot_dashboard.html'
@@ -137,13 +147,56 @@ class RobotDashboard(Node):
 
     def dashboard_state(self):
         with self.state_lock:
+            describe_model = self.node_models['describe_scene_server']
+            approach_model = self.node_models['approach_object_server']
             return dict(messages=list(self.chat_history), manual=self.manual_enabled,
                         simulation_started=self.simulation_started,
                         simulation_paused=self.simulation_paused,
                         simulation_ready=self.world_control_client.service_is_ready(),
                         dialogue_online=self.request_publisher.get_subscription_count() > 1,
+                        dialogue_model=self.node_models['vlm_dialogue_manager'],
+                        vlm_model=(describe_model if describe_model == approach_model
+                                   else None),
+                        vlm_model_mismatch=(bool(describe_model and approach_model) and
+                                            describe_model != approach_model),
                         cameras={name: time.monotonic() - stamp < 3.0
                                  for name, stamp in self.frame_times.items()})
+
+    def refresh_models(self):
+        """Read the effective models reported by the running ROS nodes."""
+        for name, client in self.model_clients.items():
+            if not client.service_is_ready():
+                with self.state_lock:
+                    self.node_models[name] = None
+                self.model_requests.pop(name, None)
+                continue
+            pending = self.model_requests.get(name)
+            if pending and not pending[0].done() and time.monotonic() - pending[1] < 5.0:
+                continue
+            request = GetParameters.Request()
+            request.names = ['model_in_use']
+            future = client.call_async(request)
+            self.model_requests[name] = (future, time.monotonic())
+            future.add_done_callback(
+                lambda completed, node_name=name: self.on_model_response(
+                    node_name, completed))
+
+    def on_model_response(self, name, future):
+        """Ignore replies from an older request after a node disconnects."""
+        pending = self.model_requests.get(name)
+        if pending is None or pending[0] is not future:
+            return
+        self.model_requests.pop(name, None)
+        try:
+            values = future.result().values
+            model = (values[0].string_value.strip()
+                     if values and values[0].type == ParameterType.PARAMETER_STRING
+                     else '')
+        except Exception as error:
+            self.get_logger().warning(f'Could not read model from {name}: {error}')
+            model = ''
+        with self.state_lock:
+            self.node_models[name] = model or None
 
     def send_chat(self, text):
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:

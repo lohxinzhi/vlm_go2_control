@@ -38,12 +38,12 @@ def generate_launch_description():
                  'client_type': LaunchConfiguration('vlm_client_type'),
                  'vlm_model': LaunchConfiguration('vlm_model'),
              }]),
-           Node(package='vlm_go2_control', executable='describe_scene_server',
-               output='screen',
-               parameters=[{
-                  'client_type': LaunchConfiguration('vlm_client_type'),
-                  'vlm_model': LaunchConfiguration('vlm_model'),
-               }]),
+        Node(package='vlm_go2_control', executable='describe_scene_server',
+             output='screen',
+             parameters=[{
+                 'client_type': LaunchConfiguration('vlm_client_type'),
+                 'vlm_model': LaunchConfiguration('vlm_model'),
+             }]),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(os.path.join(
             get_package_share_directory('vlm_go2_control'),
             'launch', 'robot_dashboard.launch.py')),

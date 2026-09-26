@@ -9,6 +9,7 @@
 
   <!-- Python client library used to create and run this ROS 2 node. -->
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>rcl_interfaces</exec_depend>
   <!-- Used by setup_venv.sh to install Python dependencies from PyPI. -->
   <exec_depend>python3-pip</exec_depend>
   <exec_depend>python3-venv</exec_depend>

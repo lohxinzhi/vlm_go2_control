@@ -11,6 +11,7 @@ import pytest
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 from rclpy.callback_groups import ReentrantCallbackGroup
 from controller_manager_msgs.msg import ControllerState
 from controller_manager_msgs.srv import ListControllers, SwitchController
@@ -80,9 +81,19 @@ def dashboard():
                         list_controllers, callback_group=simulation_callbacks)
     peer.create_service(SwitchController, '/controller_manager/switch_controller',
                         switch_controllers, callback_group=simulation_callbacks)
-    executor = MultiThreadedExecutor(num_threads=3)
+    model_nodes = {}
+    for name, model in (('vlm_dialogue_manager', 'dialogue-test-model'),
+                        ('describe_scene_server', 'vision-test-model'),
+                        ('approach_object_server', 'vision-test-model')):
+        model_node = Node(name)
+        model_node.declare_parameter('model_in_use', model)
+        model_nodes[name] = model_node
+    simulation['model_nodes'] = model_nodes
+    executor = MultiThreadedExecutor(num_threads=6)
     executor.add_node(node)
     executor.add_node(peer)
+    for model_node in model_nodes.values():
+        executor.add_node(model_node)
     thread = Thread(target=executor.spin)
     thread.start()
     try:
@@ -92,10 +103,12 @@ def dashboard():
             time.sleep(0.02)
         yield node, requests, replies, simulation
     finally:
-        node.destroy_node()
         executor.shutdown()
         thread.join()
+        node.destroy_node()
         peer.destroy_node()
+        for model_node in model_nodes.values():
+            model_node.destroy_node()
         rclpy.shutdown()
 
 
@@ -114,7 +127,9 @@ def request(node, method, path, data=None, authorized=True):
 def test_camera_and_conversation_http(dashboard):
     """Both images render and conversation messages make a ROS round trip."""
     node, prompts, replies, _ = dashboard
-    assert request(node, 'GET', '/')[0] == 200
+    status, page = request(node, 'GET', '/')
+    assert status == 200
+    assert b'Dialogue model' in page and b'VLM model' in page
     assert request(node, 'GET', '/camera.jpg')[0] == 503
     frame = np.zeros((240, 320, 3), dtype=np.uint8)
     message = node.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
@@ -136,6 +151,30 @@ def test_camera_and_conversation_http(dashboard):
     state = json.loads(request(node, 'GET', '/api/state')[1])
     assert [message['text'] for message in state['messages']] == [
         'What do you see?', 'A red cube.']
+
+
+def test_dashboard_reads_models_from_running_nodes(dashboard):
+    """Show one VLM model only while both vision nodes report the same one."""
+    node, _, _, simulation = dashboard
+    deadline = time.monotonic() + 4.0
+    while True:
+        state = json.loads(request(node, 'GET', '/api/state')[1])
+        if (state['dialogue_model'] == 'dialogue-test-model' and
+                state['vlm_model'] == 'vision-test-model'):
+            break
+        assert time.monotonic() < deadline, state
+        time.sleep(0.05)
+    approach = simulation['model_nodes']['approach_object_server']
+    assert approach.set_parameters([
+        Parameter('model_in_use', value='another-vision-model')])[0].successful
+    deadline = time.monotonic() + 4.0
+    while True:
+        state = json.loads(request(node, 'GET', '/api/state')[1])
+        if state['vlm_model_mismatch']:
+            break
+        assert time.monotonic() < deadline, state
+        time.sleep(0.05)
+    assert state['vlm_model'] is None
 
 
 def test_teleop_requires_control_and_expires(dashboard):

@@ -8,6 +8,7 @@ import time
 import cv2
 from cv_bridge import CvBridge
 from openai import OpenAI
+from rcl_interfaces.msg import ParameterDescriptor
 from sensor_msgs.msg import Image
 
 import rclpy
@@ -58,6 +59,9 @@ class DescribeSceneServer(Node):
             raise ValueError(f'Unsupported client type: {self.client_type}')
         self.vlm_model = self.declare_parameter(
             'vlm_model', default_model).value
+        self.declare_parameter('model_in_use', self.vlm_model,
+                               ParameterDescriptor(read_only=True),
+                               ignore_override=True)
         self.stale_frame_threshold_sec = self.declare_parameter(
             'stale_frame_threshold_sec', 2.0).value
         group = ReentrantCallbackGroup()
