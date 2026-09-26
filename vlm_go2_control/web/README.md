@@ -5,7 +5,7 @@ Start Gazebo/navigation as usual, then run from the workspace:
 ```bash
 source /opt/ros/jazzy/setup.bash
 source install/setup.bash
-ros2 launch vlm_go2_control vlm_dialogue_manager.launch.py
+ros2 launch vlm_go2_control dashboard_and_dialogue.launch.py
 ```
 
 Open **http://127.0.0.1:8080** in a browser on the same machine. This launch starts
