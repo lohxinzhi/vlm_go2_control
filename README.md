@@ -1,32 +1,125 @@
-# Go2 simulation with Nav2 and SLAM
+# Go2 simulation with Nav2 and robot dashboard
 
-Build and launch from the workspace:
+This repository contains the `vlm_go2_control`, `vlm_go2_interfaces`, and
+`go2_house_world` ROS 2 packages. The navigation launch starts one Go2 in the
+GreenQuartz apartment with Gazebo, Nav2, a saved map, and RViz. The dashboard
+has its own launch command and shows robot and overhead cameras, conversation,
+and manual controls.
+
+## Requirements and setup
+
+- Ubuntu 24.04 with ROS 2 Jazzy and Gazebo Harmonic.
+- The [Unitree Go2 ROS 2 Jazzy simulation](https://github.com/RobInLabUJI/unitree_go2_ros2_jazzy)
+  source packages (including `unitree_go2_sim`, `unitree_go2_description`, and
+  `champ_base`).
+- Nav2, SLAM Toolbox, ROS–Gazebo integration, ROS 2 controllers, and the other
+  ROS dependencies declared in the packages' `package.xml` files.
+- Python 3.12 with `python3-pip` (`python3-venv` if using a virtual environment).
+  `requirements.txt` includes the OpenAI client and a NumPy version compatible
+  with Jazzy's `cv_bridge`.
+- An OpenAI API key for dialogue and vision requests. The camera-only dashboard
+  can start without one; dialogue and coordinated manual control require its
+  dialogue stack.
+
+Create a ROS 2 workspace and clone the package and Go2 simulation sources:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
-colcon build --symlink-install --packages-select vlm_go2_control
+mkdir -p ~/go2_ws/src
+cd ~/go2_ws/src
+git clone https://github.com/lohxinzhi/vlm_go2_control.git
+git clone https://github.com/RobInLabUJI/unitree_go2_ros2_jazzy.git
+cd ~/go2_ws
+sudo apt install python3-pip python3-rosdep ros-jazzy-navigation2 \
+  ros-jazzy-nav2-bringup ros-jazzy-slam-toolbox
+rosdep update
+rosdep install --from-paths src/vlm_go2_control src/unitree_go2_ros2_jazzy \
+  --ignore-src -r -y
+```
+
+Choose one way to install the Python requirements. For an isolated virtual
+environment that can still access ROS's system Python packages:
+
+```bash
+sudo apt install python3-venv
+./src/vlm_go2_control/setup_venv.sh
+source src/vlm_go2_control/.venv/bin/activate
+```
+
+Or use the main Python interpreter without a virtual environment:
+
+```bash
+python3 -m pip install --user --break-system-packages \
+  -r src/vlm_go2_control/requirements.txt
+```
+
+Ubuntu 24.04 requires `--break-system-packages` for pip installs into its
+system-managed Python. `--user` keeps these packages in your user directory.
+
+Then build the workspace:
+
+```bash
+python3 -m colcon build --symlink-install --packages-up-to vlm_go2_control
+source install/setup.bash
+```
+
+If the workspace already has the Go2 or Nav2 sources, keep those sources and
+build them in the same overlay. If you chose the virtual environment, activate
+it before building and in each new launch terminal with
+`source src/vlm_go2_control/.venv/bin/activate`.
+
+## Launch simulation and navigation
+
+In terminal 1:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd ~/go2_ws
 source install/setup.bash
 ros2 launch vlm_go2_control go2_sim_nav2_launch.py
 ```
 
-The default is online SLAM in TIbuilding.sdf, with Gazebo and RViz.
-Wait for the controllers and Nav2 to activate, then use RViz's Nav2 Goal
-tool to navigate through mapped free space. Mapping continues while moving;
-this launch does not perform autonomous frontier exploration.
+Wait for the controllers and Nav2 to activate, then use RViz's Nav2 Goal tool
+to navigate. The default uses the included `maps/bto_1.yaml` with AMCL. Start
+online mapping with `slam:=true`; mapping continues while the robot moves.
+This launch does not perform autonomous frontier exploration.
 
-Options:
+## Launch the robot dashboard
 
-- `gui:=false use_rviz:=false`: run without the Gazebo GUI or RViz.
+In terminal 2, after starting the simulation, launch the dashboard and its
+dialogue/action servers. Set the API key in this terminal if using VLM requests:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd ~/go2_ws
+source install/setup.bash
+export OPENAI_API_KEY='your-api-key'
+ros2 launch vlm_go2_control dashboard_and_dialogue.launch.py
+```
+
+Open <http://127.0.0.1:8080> on the same machine. The launch also starts the
+overhead camera bridge. Use the conversation panel for VLM requests. To drive
+with the dashboard, click **Take manual control**; click **Release manual control**
+before requesting robot motion through dialogue again. If you only need the
+camera views and dashboard, run
+`ros2 launch vlm_go2_control robot_dashboard.launch.py` instead; the dialogue
+and action servers will not be started. See the [dashboard guide](vlm_go2_control/web/README.md)
+for control details. Do not start both dashboard launch files together.
+
+Simulation and navigation options:
+
+- `gui:=true`: show the Gazebo GUI (off by default).
+- `use_rviz:=false`: run without RViz.
 - `world:=/absolute/path/to/world.sdf`: select another world.
-  Set the spawn coordinates to match its floor height; for the upstream
-  `default.sdf`, use `world_init_z:=0.375`. TIbuilding uses `4.375`.
-- `ground_height:=4.0`: floor elevation in Gazebo world coordinates.
-  Defaults to `world_init_z - 0.375`; override it if spawning above the normal height.
-- `slam:=false map:=/absolute/path/to/map.yaml`: use AMCL with a saved map.
+  Set `world_init_x`, `world_init_y`, `world_init_z`, and `world_init_heading`
+  to a valid pose for that world.
+- `slam:=true`: build a map online with SLAM Toolbox.
+- `map:=/absolute/path/to/map.yaml`: use another saved map with the default
+  `slam:=false` mode.
 - `params_file:=/absolute/path/to/params.yaml`: override the combined Nav2/SLAM settings.
 - `use_composition:=false`: run Nav2 servers as separate processes.
 
-Save the map from another sourced terminal:
+When using `slam:=true`, save the map from another sourced terminal:
 
 ```bash
 ros2 run nav2_map_server map_saver_cli -f /tmp/go2_map --ros-args -p use_sim_time:=true
