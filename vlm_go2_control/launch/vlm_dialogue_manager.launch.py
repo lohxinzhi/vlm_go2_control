@@ -1,8 +1,12 @@
 """Launch the VLM dialogue manager and its action servers."""
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+import os
+
+from ament_index_python.packages import get_package_share_directory
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -18,8 +22,9 @@ def generate_launch_description():
              output='screen'),
         Node(package='vlm_go2_control', executable='describe_scene_server',
              output='screen'),
-        Node(package='vlm_go2_control', executable='show_img',
-             output='screen'),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(os.path.join(
+            get_package_share_directory('vlm_go2_control'),
+            'launch', 'robot_dashboard.launch.py'))),
         Node(package='vlm_go2_control', executable='vlm_dialogue_manager',
              output='screen', parameters=[{'use_console_input': False}],
              condition=IfCondition(LaunchConfiguration('start_dialogue'))),

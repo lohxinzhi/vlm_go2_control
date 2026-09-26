@@ -13,7 +13,7 @@ from cv_bridge import CvBridge
 from openai import OpenAI
 from sensor_msgs.msg import Image, LaserScan
 from std_msgs.msg import Float32, String
-from std_srvs.srv import Trigger
+from std_srvs.srv import SetBool, Trigger
 import yaml
 
 import rclpy
@@ -119,12 +119,17 @@ class VLMDialogueManager(Node):
         self.describe_client = self.create_client(
             DescribeScene, '/describe_scene', callback_group=group)
         self.actions_publisher = self.create_publisher(String, '/vlm/actions', 10)
+        self.reply_publisher = self.create_publisher(String, '/vlm/reply', 10)
         self.request_queue = Queue()
         self.history_lock = Lock()
         self.motion_lock = Lock()
         self.plan_lock = Lock()
         self.active_plan = None
         self.active_goal = None
+        self.manual_control = False
+        self.create_service(
+            SetBool, '/vlm/manual_control', self.set_manual_control,
+            callback_group=group)
         Thread(target=self.request_worker, daemon=True).start()
         self.create_subscription(
             String, '/vlm/user_request', self.request_cb, 10,
@@ -261,8 +266,25 @@ class VLMDialogueManager(Node):
 
     def report_reply(self, reply):
         print('Robot:', reply, flush=True)
+        self.reply_publisher.publish(String(data=reply))
         with self.history_lock:
             self.history.append({'role': 'assistant', 'content': reply})
+
+    def set_manual_control(self, request, response):
+        """Cancel and drain autonomous motion before granting GUI control."""
+        with self.plan_lock:
+            self.manual_control = request.data
+            if request.data and self.active_plan is not None:
+                self.active_plan.set()
+        if request.data:
+            if not self.motion_lock.acquire(timeout=8.0):
+                response.message = 'Motion is still stopping; try enabling control again.'
+                return response
+            self.motion_lock.release()
+        response.success = True
+        response.message = (
+            'Manual control enabled.' if request.data else 'Manual control released.')
+        return response
 
     def execute_plan(self, commands, cancel_event):
         # Wait for the previous action server to finish cancellation before
@@ -313,6 +335,9 @@ class VLMDialogueManager(Node):
                                  for command in commands)
             if changes_motion:
                 with self.plan_lock:
+                    if self.manual_control:
+                        self.report_reply('Release manual control in the dashboard first.')
+                        return
                     if self.active_plan is not None:
                         self.active_plan.set()
                     cancel_event = Event()

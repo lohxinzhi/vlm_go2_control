@@ -17,6 +17,7 @@ setup(
         (os.path.join('share', package_name, 'maps'), glob('maps/*')),
         (os.path.join('share', package_name, 'params'), glob('params/*.yaml')),
         (os.path.join('share', package_name, 'rviz'), glob('rviz/*.rviz')),
+        (os.path.join('share', package_name, 'web'), glob('web/*')),
     ],
     install_requires=[
         'numpy<2',
@@ -45,7 +46,8 @@ setup(
             'goto_room_server = vlm_go2_control.goto_room_server:main',
             'approach_object_server = vlm_go2_control.approach_object_server:main',
             'describe_scene_server = vlm_go2_control.describe_scene_server:main',
-            'show_img = vlm_go2_control.show_img:main',
+            'robot_dashboard = vlm_go2_control.robot_dashboard:main',
+            'show_img = vlm_go2_control.robot_dashboard:main',
         ],
     },
 )

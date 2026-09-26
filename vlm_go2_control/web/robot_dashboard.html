@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go2 · Robot dashboard</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;color:#e7edf6;background:#10151e}
+*{box-sizing:border-box}body{margin:0}header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid #2b3443}h1{font-size:21px;margin:0}h1 span{color:#78e7b5}small,.muted{color:#a7b3c5}main{max-width:1800px;margin:auto;padding:22px;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:20px}.views{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:#1a2230;border:1px solid #303b4e;border-radius:16px;overflow:hidden}.card-title{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;font-size:15px;font-weight:650}.camera{position:relative;background:#090e16;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}.camera img{width:100%;height:100%;object-fit:contain}.camera img:not([src]){display:none}.placeholder{position:absolute;color:#8795aa;text-align:center;padding:20px}.badge{font-size:11px;letter-spacing:.04em;color:#b0bacc;font-weight:500}.badge.live{color:#78e7b5}.controls{margin-top:18px;padding:20px;display:flex;justify-content:space-between;gap:24px;align-items:center}.controls h2{margin:0 0 8px;font-size:18px}.controls p{font-size:13px;color:#a7b3c5;max-width:330px;line-height:1.6}.pad{display:grid;grid-template-columns:58px 58px 58px;grid-template-rows:52px 52px 52px;gap:7px;flex-shrink:0}.pad button{font-size:27px;touch-action:none;user-select:none}.pad .stop{font-size:12px;color:#ffb8b8;background:#452c36}.up{grid-column:2}.left{grid-column:1;grid-row:2}.stop{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}.down{grid-column:2;grid-row:3}button{cursor:pointer;border:1px solid #445269;border-radius:10px;background:#293649;color:#ecf2fc;padding:12px;font-weight:650}button:hover{background:#354861}button:focus-visible,textarea:focus-visible{outline:2px solid #78e7b5;outline-offset:2px}button:disabled{opacity:.4;cursor:not-allowed}button.active{background:#167c55;border-color:#78e7b5}.primary{background:#196d51;border-color:#2f9371}.chat{display:flex;flex-direction:column;min-height:650px;height:calc(100vh - 128px);max-height:1100px}.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}.bubble{max-width:90%;padding:12px 15px;border-radius:14px;background:#2c374a;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-size:14px;align-self:flex-start}.bubble.user{align-self:flex-end;background:#155b49}.bubble small{display:block;margin-bottom:5px;font-size:11px;font-weight:700;color:#bac9da}.empty{margin:auto;text-align:center;line-height:1.7;color:#93a3b9;font-size:14px}.composer{display:flex;gap:10px;padding:16px;border-top:1px solid #303b4e}textarea{resize:vertical;min-height:52px;max-height:180px;flex:1;min-width:0;background:#101823;color:#edf4ff;border:1px solid #445269;border-radius:10px;padding:12px;font:inherit;font-size:14px}.hint{font-size:12px;color:#92a2b9;padding:0 18px 15px}#error{margin:0 22px 0;color:#ffd1b3;background:#422d27;padding:12px 16px;border-radius:10px}#error:empty{display:none}#connection{font-size:13px;color:#a7b3c5}.note{font-size:12px;padding:16px 4px;color:#a7b3c5;line-height:1.5}@media(max-width:1050px){main{grid-template-columns:1fr}.chat{height:600px;min-height:450px}}@media(max-width:600px){header{padding:18px}main{padding:12px}.views{grid-template-columns:1fr}.controls{flex-direction:column;align-items:stretch}.pad{align-self:center}.chat{height:550px}}
+</style>
+</head>
+<body>
+<header><h1><span>Go2</span> / Robot dashboard</h1><span id="connection">Connecting…</span></header>
+<p id="error" role="alert"></p>
+<main>
+<section aria-label="Robot views and controls">
+  <div class="views">
+    <article class="card"><div class="card-title">Robot camera <span class="badge" id="camera-status">WAITING</span></div><div class="camera"><span class="placeholder" id="camera-placeholder">Waiting for the robot camera…</span><img id="camera" alt="Live robot camera with object boxes and velocity arrows"></div></article>
+    <article class="card"><div class="card-title">Top-down view <span class="badge" id="top-down-status">WAITING</span></div><div class="camera"><span class="placeholder" id="top-down-placeholder">Waiting for the top-down camera…</span><img id="top-down" alt="Live top-down view of the scene"></div></article>
+  </div>
+  <section class="card controls" aria-label="Teleoperation">
+    <div><h2>Manual control</h2><p>Take control to stop the current robot task. Hold a direction button or use the arrow keys to move. Release to stop.</p><button id="manual" class="primary">Take manual control</button><p id="control-status">Dialogue controls robot motion.</p></div>
+    <div class="pad">
+      <button class="up direction" data-direction="forward" aria-label="Move forward" disabled>↑</button>
+      <button class="left direction" data-direction="left" aria-label="Turn left" disabled>←</button>
+      <button class="stop" id="stop" aria-label="Stop manual motion" disabled>STOP</button>
+      <button class="right direction" data-direction="right" aria-label="Turn right" disabled>→</button>
+      <button class="down direction" data-direction="backward" aria-label="Move backward" disabled>↓</button>
+    </div>
+  </section>
+  <p class="note">Green arrows show the most recent velocity command. Object boxes disappear after three seconds without an update.</p>
+</section>
+<section class="card chat" aria-label="Chat with the robot">
+  <div class="card-title">Conversation <span class="badge" id="dialogue-status">CONNECTING</span></div>
+  <div class="messages" id="messages" role="log" aria-live="polite"><div class="empty" id="empty">Talk to Go2<br>Try “What do you see?” or “Go to the kitchen.”</div></div>
+  <form id="chat-form" class="composer"><textarea id="prompt" aria-label="Message to the robot" placeholder="Message Go2…" maxlength="4000" rows="2" required></textarea><button type="submit" id="send" class="primary">Send</button></form>
+  <div class="hint">Enter to send · Shift + Enter for a new line · History retained while the dashboard runs.</div>
+</section>
+</main>
+<script>
+'use strict';
+const token='__CONTROL_TOKEN__';
+const clientId=crypto.randomUUID();let sequence=0;
+const $=id=>document.getElementById(id);
+let manual=false,held=null,lastMessage=0,commandBusy=false,manualBusy=false;
+function error(text){$('error').textContent=text;}
+async function post(path,data){
+  if(path==='/api/teleop')data={...data,client_id:clientId,sequence:++sequence};
+  const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Control-Token':token},body:JSON.stringify(data),signal:AbortSignal.timeout(12000)});
+  const body=await response.json(); if(!response.ok)throw new Error(body.error||'Request failed.'); return body;
+}
+function setManual(enabled){manual=enabled;$('manual').textContent=enabled?'Release manual control':'Take manual control';$('control-status').textContent=enabled?'Manual control active. Release it before asking Go2 to move.':'Dialogue controls robot motion.';document.querySelectorAll('.pad button').forEach(b=>b.disabled=!enabled);}
+async function refreshState(){
+  try{
+    const response=await fetch('/api/state',{signal:AbortSignal.timeout(2500)});if(!response.ok)throw new Error('Disconnected');const state=await response.json();
+    $('connection').textContent='Dashboard connected';
+    if(!manualBusy)setManual(state.manual);
+    $('dialogue-status').textContent=state.dialogue_online?'ONLINE':'OFFLINE';$('dialogue-status').classList.toggle('live',state.dialogue_online);
+    for(const name of ['camera','top-down']){const live=!!state.cameras[name];$(name+'-status').textContent=live?'LIVE':'WAITING';$(name+'-status').classList.toggle('live',live);}
+    const messages=$('messages');const nearBottom=messages.scrollHeight-messages.scrollTop-messages.clientHeight<100;
+    if(state.messages.length && state.messages[state.messages.length-1].id<lastMessage){messages.replaceChildren();lastMessage=0;}
+    for(const message of state.messages){if(message.id<=lastMessage)continue;$('empty')?.remove();const bubble=document.createElement('div');bubble.className='bubble '+message.role;const label=document.createElement('small');label.textContent=message.role==='user'?'You':'Go2';bubble.append(label,document.createTextNode(message.text));messages.append(bubble);lastMessage=message.id;}
+    while(messages.children.length>200)messages.firstChild.remove();if(nearBottom)messages.scrollTop=messages.scrollHeight;
+  }catch(e){$('connection').textContent='Connection lost — motion stops automatically';setManual(false);held=null;}
+  setTimeout(refreshState,500);
+}
+async function refreshCamera(name){
+  try{const response=await fetch('/'+name+'.jpg',{signal:AbortSignal.timeout(2500)});if(response.ok){const url=URL.createObjectURL(await response.blob());const image=$(name);const previous=image.src;image.src=url;$(name+'-placeholder').hidden=true;if(previous.startsWith('blob:'))URL.revokeObjectURL(previous);}}
+  catch(e){}setTimeout(()=>refreshCamera(name),150);
+}
+$('chat-form').addEventListener('submit',async event=>{event.preventDefault();const input=$('prompt');const text=input.value.trim();if(!text)return;$('send').disabled=true;try{await post('/api/chat',{text});input.value='';error('');}catch(e){error(e.message);}finally{$('send').disabled=false;input.focus();}});
+$('prompt').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();if(!$('send').disabled)$('chat-form').requestSubmit();}});
+async function stop(){held=null;document.querySelectorAll('.direction').forEach(b=>b.classList.remove('active'));try{await post('/api/teleop',{direction:'stop'});}catch(e){error(e.message);}}
+async function commandTick(){if(commandBusy||!held||!manual)return;commandBusy=true;try{await post('/api/teleop',{direction:held});}catch(e){held=null;error(e.message);}finally{commandBusy=false;}}
+function start(direction){if(!manual||manualBusy)return;held=direction;document.querySelectorAll('.direction').forEach(b=>b.classList.toggle('active',b.dataset.direction===direction));commandTick();}
+document.querySelectorAll('.direction').forEach(button=>{button.addEventListener('pointerdown',event=>{event.preventDefault();button.setPointerCapture(event.pointerId);start(button.dataset.direction);});button.addEventListener('pointerup',stop);button.addEventListener('pointercancel',stop);button.addEventListener('lostpointercapture',()=>{if(held)stop();});});
+$('stop').addEventListener('click',stop);
+$('manual').addEventListener('click',async()=>{manualBusy=true;$('manual').disabled=true;try{await stop();await post('/api/manual',{enabled:!manual});setManual(!manual);error('');}catch(e){error(e.message);}finally{manualBusy=false;$('manual').disabled=false;}});
+const keys={ArrowUp:'forward',ArrowDown:'backward',ArrowLeft:'left',ArrowRight:'right'};
+window.addEventListener('keydown',event=>{if(['TEXTAREA','INPUT'].includes(document.activeElement.tagName))return;if(keys[event.key]&&manual){event.preventDefault();if(!event.repeat)start(keys[event.key]);}else if(event.code==='Space'&&manual){event.preventDefault();stop();}});
+window.addEventListener('keyup',event=>{if(keys[event.key]&&held===keys[event.key]){event.preventDefault();stop();}});
+window.addEventListener('blur',()=>{if(held)stop();});document.addEventListener('visibilitychange',()=>{if(document.hidden&&held)stop();});
+window.addEventListener('pagehide',()=>{held=null;fetch('/api/teleop',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Control-Token':token},body:JSON.stringify({direction:'stop',client_id:clientId,sequence:++sequence})}).catch(()=>{});});
+setInterval(commandTick,100);refreshState();refreshCamera('camera');refreshCamera('top-down');
+</script>
+</body>
+</html>

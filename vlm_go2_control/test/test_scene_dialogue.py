@@ -49,7 +49,7 @@ def test_new_motion_plan_cancels_previous_plan(monkeypatch):
             start=lambda: pending.append((target, args))))
     dialogue = SimpleNamespace(
         history=[], history_lock=Lock(), plan_lock=Lock(),
-        active_plan=None, rooms={1: {'name': 'Kitchen'}},
+        active_plan=None, manual_control=False, rooms={1: {'name': 'Kitchen'}},
         client=SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
             create=lambda **_: SimpleNamespace(choices=[SimpleNamespace(
                 message=SimpleNamespace(content=json.dumps(plans.pop(0))))])))),
@@ -139,3 +139,26 @@ def test_canceled_plan_sends_cancel_request_to_action_server(monkeypatch):
     assert not success
     assert message == 'Canceled.'
     assert len(cancellations) == 1
+
+
+def test_manual_control_cancels_motion_before_acknowledging():
+    """Manual commands are allowed only after the old motion plan drains."""
+    active_plan = Event()
+    dialogue = SimpleNamespace(plan_lock=Lock(), motion_lock=Lock(),
+                               active_plan=active_plan, manual_control=False)
+    response = SimpleNamespace(success=False, message='')
+    vlm_dialogue_manager.VLMDialogueManager.set_manual_control(
+        dialogue, SimpleNamespace(data=True), response)
+    assert active_plan.is_set()
+    assert dialogue.manual_control
+    assert response.success
+
+
+def test_reply_is_published_for_dashboard():
+    """The same reply reaches both dialogue history and the browser topic."""
+    published = []
+    dialogue = SimpleNamespace(history_lock=Lock(), history=[],
+                               reply_publisher=SimpleNamespace(publish=published.append))
+    vlm_dialogue_manager.VLMDialogueManager.report_reply(dialogue, 'A red cube.')
+    assert published[0].data == 'A red cube.'
+    assert dialogue.history[-1]['content'] == 'A red cube.'
