@@ -16,7 +16,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
 from vlm_go2_interfaces.action import ApproachObject
 
-from vlm_go2_control.task4_vlm_obj_approach import Camera
+from vlm_go2_control.vlm_dialogue_manager import Camera
 
 
 class ApproachObjectServer(Node):

@@ -69,11 +69,11 @@ def wait_for_future(future):
     return future.result() if ready.is_set() else None
 
 
-class VLMDialogue(Node):
+class VLMDialogueManager(Node):
     """Turn requests into JSON actions and relay them to ROS action servers."""
 
     def __init__(self):
-        super().__init__('vlm_agent')
+        super().__init__('vlm_dialogue_manager')
         room_path = os.path.join(
             get_package_share_directory('go2_house_world'),
             'params', 'bto_rooms.yaml')
@@ -245,7 +245,7 @@ class VLMDialogue(Node):
 
 def main():
     rclpy.init()
-    dialogue = VLMDialogue()
+    dialogue = VLMDialogueManager()
     executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(dialogue)
     try:

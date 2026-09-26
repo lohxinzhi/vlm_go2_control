@@ -1,4 +1,4 @@
-"""Launch the task 4 dialogue manager and its action servers."""
+"""Launch the VLM dialogue manager and its action servers."""
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -20,7 +20,7 @@ def generate_launch_description():
              output='screen'),
         Node(package='vlm_go2_control', executable='show_img',
              output='screen'),
-        Node(package='vlm_go2_control', executable='task4_vlm_obj_approach',
+        Node(package='vlm_go2_control', executable='vlm_dialogue_manager',
              output='screen', parameters=[{'use_console_input': False}],
              condition=IfCondition(LaunchConfiguration('start_dialogue'))),
     ])

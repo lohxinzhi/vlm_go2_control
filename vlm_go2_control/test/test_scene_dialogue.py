@@ -2,7 +2,7 @@
 
 from types import SimpleNamespace
 
-from vlm_go2_control import task4_vlm_obj_approach
+from vlm_go2_control import vlm_dialogue_manager
 
 
 def test_visual_question_is_forwarded_to_service(monkeypatch):
@@ -15,9 +15,9 @@ def test_visual_question_is_forwarded_to_service(monkeypatch):
     response = SimpleNamespace(
         success=True, description='A red cube.', message='')
     monkeypatch.setattr(
-        task4_vlm_obj_approach, 'wait_for_future', lambda _: response)
+        vlm_dialogue_manager, 'wait_for_future', lambda _: response)
 
-    reply, success = task4_vlm_obj_approach.VLMDialogue.execute_command(
+    reply, success = vlm_dialogue_manager.VLMDialogueManager.execute_command(
         dialogue, {'action': 'describe', 'mode': 'vqa',
                    'question': 'What colour is the cube?'})
 
@@ -26,7 +26,7 @@ def test_visual_question_is_forwarded_to_service(monkeypatch):
     assert requests[0].mode == 'vqa'
     assert requests[0].question == 'What colour is the cube?'
 
-    reply, success = task4_vlm_obj_approach.VLMDialogue.execute_command(
+    reply, success = vlm_dialogue_manager.VLMDialogueManager.execute_command(
         dialogue, {'action': 'describe', 'mode': 'describe'})
     assert success
     assert reply == 'A red cube.'
