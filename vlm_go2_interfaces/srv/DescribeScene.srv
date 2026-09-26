@@ -1,3 +1,5 @@
+string mode  # "describe" for a scene summary, "vqa" for a visual question
+string question  # required when mode is "vqa"
 ---
 bool success
 string description

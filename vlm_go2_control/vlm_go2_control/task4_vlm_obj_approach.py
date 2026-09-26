@@ -89,10 +89,16 @@ class VLMDialogue(Node):
             'in order. Allowed actions: '
             '{"action": "goto_room", "room": <integer>}, '
             '{"action": "goto_room_name", "room_name": "<room name>"}, '
-            '{"action": "describe"}, '
+            '{"action": "describe", "mode": "describe"}, '
+            '{"action": "describe", "mode": "vqa", '
+            '"question": "<specific question about the current view>"}, '
             '{"action": "approach", "object": "<object name>"}, '
             '{"action": "stop"}, '
             '{"action": "chat", "reply": "<answer or clarification>"}. '
+            'Use describe mode for a general account of the current view. '
+            'Use vqa mode for a specific question about what the robot can see; '
+            'preserve the question in the question field. Do not answer visual '
+            'questions from memory with chat. '
             'Use a separate approach action for each object. Stop ends the sequence. '
             'For an impossible or unsafe request, use chat to explain. '
             f'Valid room names: {room_names}. Valid room ids: {room_ids}.')
@@ -163,10 +169,20 @@ class VLMDialogue(Node):
             success, message = self.send_action(self.approach_client, goal)
             return message, success
         if action == 'describe':
+            question = command.get('question', '')
+            mode = command.get('mode', 'vqa' if question else 'describe')
+            if mode not in ('describe', 'vqa'):
+                return 'Invalid scene request mode.', False
+            if mode == 'vqa' and (
+                    not isinstance(question, str) or not question.strip()):
+                return 'A visual question is required for vqa mode.', False
             if not self.describe_client.wait_for_service(timeout_sec=5.0):
                 return 'Scene description service unavailable.', False
+            request = DescribeScene.Request()
+            request.mode = mode
+            request.question = question.strip() if mode == 'vqa' else ''
             response = wait_for_future(
-                self.describe_client.call_async(DescribeScene.Request()))
+                self.describe_client.call_async(request))
             if response is None:
                 return 'Scene description did not return a response.', False
             return (response.description if response.success else response.message,

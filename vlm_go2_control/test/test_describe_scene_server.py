@@ -41,6 +41,8 @@ def test_describes_fresh_frame(scene_server):
 
     assert response.success
     assert response.description == 'A red cube is on the floor.'
+    assert (calls[0]['messages'][0]['content'][0]['text'] ==
+            describe_scene_server.SCENE_DESCRIPTION_PROMPT)
     assert calls[0]['messages'][0]['content'][1]['image_url']['url'].startswith(
         'data:image/jpeg;base64,')
 
@@ -57,4 +59,38 @@ def test_rejects_missing_and_stale_frames(scene_server):
     stale = server.describe(DescribeScene.Request(), DescribeScene.Response())
     assert not stale.success
     assert 'stale' in stale.message
+    assert not calls
+
+
+def test_answers_visual_question(scene_server):
+    """A specific question selects the VQA prompt and preserves its wording."""
+    server, calls = scene_server
+    server.frame = np.zeros((8, 8, 3), dtype=np.uint8)
+    server.frame_received_at = time.monotonic()
+    request = DescribeScene.Request()
+    request.mode = 'vqa'
+    request.question = 'What colour is the cube?'
+
+    response = server.describe(request, DescribeScene.Response())
+
+    assert response.success
+    prompt = calls[0]['messages'][0]['content'][0]['text']
+    assert describe_scene_server.VISUAL_VQA_PROMPT in prompt
+    assert '"What colour is the cube?"' in prompt
+
+
+def test_rejects_invalid_visual_requests(scene_server):
+    """Invalid modes and missing questions do not invoke the VLM."""
+    server, calls = scene_server
+    request = DescribeScene.Request()
+    request.mode = 'vqa'
+    missing_question = server.describe(request, DescribeScene.Response())
+    assert not missing_question.success
+    assert 'question is required' in missing_question.message
+
+    request.mode = 'describe'
+    request.question = 'What is on the floor?'
+    mismatched_mode = server.describe(request, DescribeScene.Response())
+    assert not mismatched_mode.success
+    assert 'requires vqa mode' in mismatched_mode.message
     assert not calls
