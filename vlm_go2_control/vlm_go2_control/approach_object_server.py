@@ -193,7 +193,8 @@ class ApproachObjectServer(Node):
         question = (
             f'Locate the {object_name} in the image. Answer ONLY with JSON: '
             '{"found":true/false, "bbox": [x1, y1, x2, y2]} '
-            'in pixel coordinates. If not found, return false and an empty bbox.')
+            'in pixel coordinates. (x1,y1) is the top left and x2,y2 is the bottom right.'
+            'If not found, return false and an empty bbox.')
         response = self.client.chat.completions.create(
             model=self.vlm_model,
             messages=[{'role': 'user', 'content': [
