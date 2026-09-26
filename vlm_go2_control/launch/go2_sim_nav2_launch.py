@@ -36,7 +36,7 @@ def generate_launch_description():
         'world': (
             os.path.join(world_dir, 'worlds', 'greenquartz_bto.sdf'),
             'Gazebo world file'),
-        'gui': ('true', 'Start the Gazebo GUI'),
+        'gui': ('false', 'Start the Gazebo GUI when true'),
         'robot_name': ('go2', 'Gazebo entity name'),
         'world_init_x': ('4.0', 'Spawn x'),
         'world_init_y': ('4.0', 'Spawn y'),
