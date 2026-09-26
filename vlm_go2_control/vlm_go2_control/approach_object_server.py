@@ -30,6 +30,8 @@ class ApproachObjectServer(Node):
         self.stop_requested = Event()
         self.goal_lock = Lock()
         self.busy = False
+        self.filter_alpha = 0.25
+        self.filtered_cmd = Twist()
         self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.bbox_publisher = self.create_publisher(
             Detection2D, '/ground_bbox', 10)
@@ -55,10 +57,22 @@ class ApproachObjectServer(Node):
 
     def stop(self, _request, response):
         self.stop_requested.set()
-        self.velocity_publisher.publish(Twist())
+        self.filtered_cmd = Twist()
+        self.velocity_publisher.publish(self.filtered_cmd)
         response.success = True
         response.message = 'Stopped.'
         return response
+
+    def apply_low_pass_filter(self, command):
+        filtered = Twist()
+        filtered.linear.x = (
+            self.filter_alpha * command.linear.x +
+            (1.0 - self.filter_alpha) * self.filtered_cmd.linear.x)
+        filtered.angular.z = (
+            self.filter_alpha * command.angular.z +
+            (1.0 - self.filter_alpha) * self.filtered_cmd.angular.z)
+        self.filtered_cmd = filtered
+        return filtered
 
     def ask_vlm(self, object_name, frame):
         encoded_ok, encoded_frame = cv2.imencode('.jpg', frame)
@@ -128,7 +142,8 @@ class ApproachObjectServer(Node):
                 command = Twist()
                 command.angular.z = -0.1 * error
                 command.linear.x = 0.5 if abs(error) < 0.25 else 0.0
-                self.velocity_publisher.publish(command)
+                filtered_command = self.apply_low_pass_filter(command)
+                self.velocity_publisher.publish(filtered_command)
                 goal_handle.publish_feedback(
                     ApproachObject.Feedback(status='Approaching object'))
             result.message = f'Sorry, I could not find the {object_name}.'
@@ -140,7 +155,8 @@ class ApproachObjectServer(Node):
             goal_handle.abort()
             return result
         finally:
-            self.velocity_publisher.publish(Twist())
+            self.filtered_cmd = Twist()
+            self.velocity_publisher.publish(self.filtered_cmd)
             with self.goal_lock:
                 self.busy = False
 
