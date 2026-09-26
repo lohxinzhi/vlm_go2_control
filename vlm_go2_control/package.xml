@@ -20,6 +20,7 @@
   <depend>launch_ros</depend>
   <depend>unitree_go2_sim</depend>
   <depend>go2_house_world</depend>
+  <depend>vlm_go2_interfaces</depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>unitree_go2_description</exec_depend>
   <exec_depend>champ_base</exec_depend>
@@ -35,6 +36,7 @@
   <exec_depend>nav2_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>vision_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
