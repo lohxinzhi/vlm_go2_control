@@ -2,7 +2,7 @@
 
 from http.client import HTTPConnection
 import json
-from threading import Thread
+from threading import Event, Thread
 import time
 
 import cv2
@@ -11,6 +11,9 @@ import pytest
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.callback_groups import ReentrantCallbackGroup
+from controller_manager_msgs.msg import ControllerState
+from controller_manager_msgs.srv import ListControllers, SwitchController
 from ros_gz_interfaces.srv import ControlWorld
 from std_msgs.msg import String
 from std_srvs.srv import SetBool
@@ -24,7 +27,14 @@ def dashboard():
     node = RobotDashboard()
     peer = Node('dashboard_test_peer')
     requests = []
-    world_requests = []
+    simulation = {
+        'world_requests': [], 'switch_requests': [],
+        'states': {'joint_states_controller': 'inactive',
+                   'joint_group_effort_controller': 'inactive'},
+        'switch_success': True,
+        'switch_queued': Event(), 'world_started': Event(),
+    }
+    simulation_callbacks = ReentrantCallbackGroup()
     peer.create_subscription(
         String, '/vlm/user_request', lambda msg: requests.append(msg.data), 10)
     replies = peer.create_publisher(String, '/vlm/reply', 10)
@@ -36,11 +46,40 @@ def dashboard():
     peer.create_service(SetBool, '/vlm/manual_control', manual)
 
     def control_world(request, response):
-        world_requests.append(request.world_control.pause)
-        response.success = True
+        paused = request.world_control.pause
+        simulation['world_requests'].append(paused)
+        if paused:
+            simulation['world_started'].clear()
+            response.success = True
+        else:
+            needs_switch = any(state == 'inactive'
+                               for state in simulation['states'].values())
+            response.success = not needs_switch or simulation['switch_queued'].wait(2.0)
+            if response.success:
+                simulation['world_started'].set()
         return response
 
-    peer.create_service(ControlWorld, '/world/greenquartz_bto/control', control_world)
+    def list_controllers(_request, response):
+        response.controller = [ControllerState(name=name, state=state)
+                               for name, state in simulation['states'].items()]
+        return response
+
+    def switch_controllers(request, response):
+        simulation['switch_requests'].append(list(request.activate_controllers))
+        simulation['switch_queued'].set()
+        response.ok = (simulation['world_started'].wait(2.0) and
+                       simulation['switch_success'])
+        if response.ok:
+            for name in request.activate_controllers:
+                simulation['states'][name] = 'active'
+        return response
+
+    peer.create_service(ControlWorld, '/world/greenquartz_bto/control', control_world,
+                        callback_group=simulation_callbacks)
+    peer.create_service(ListControllers, '/controller_manager/list_controllers',
+                        list_controllers, callback_group=simulation_callbacks)
+    peer.create_service(SwitchController, '/controller_manager/switch_controller',
+                        switch_controllers, callback_group=simulation_callbacks)
     executor = MultiThreadedExecutor(num_threads=3)
     executor.add_node(node)
     executor.add_node(peer)
@@ -51,7 +90,7 @@ def dashboard():
         while node.request_publisher.get_subscription_count() < 2:
             assert time.monotonic() < deadline, 'ROS discovery timed out'
             time.sleep(0.02)
-        yield node, requests, replies, world_requests
+        yield node, requests, replies, simulation
     finally:
         node.destroy_node()
         executor.shutdown()
@@ -124,11 +163,14 @@ def test_teleop_requires_control_and_expires(dashboard):
 
 def test_simulation_start_pause_resume_from_dashboard(dashboard):
     """Dashboard commands change Gazebo state and stop motion on pause."""
-    node, _, _, world_requests = dashboard
+    node, _, _, simulation = dashboard
+    world_requests = simulation['world_requests']
     assert node.dashboard_state()['simulation_paused']
     assert request(node, 'POST', '/api/simulation/start', {}, authorized=False)[0] == 403
     assert request(node, 'POST', '/api/simulation/start', {})[0] == 200
     assert world_requests == [False]
+    assert simulation['switch_requests'] == [
+        ['joint_states_controller', 'joint_group_effort_controller']]
     assert node.dashboard_state()['simulation_started']
     assert not node.dashboard_state()['simulation_paused']
     assert request(node, 'POST', '/api/simulation/start', {})[0] == 200
@@ -148,4 +190,14 @@ def test_simulation_start_pause_resume_from_dashboard(dashboard):
     assert world_requests == [False, True]
     assert request(node, 'POST', '/api/simulation/start', {})[0] == 200
     assert world_requests == [False, True, False]
+    assert len(simulation['switch_requests']) == 1
     assert not node.dashboard_state()['simulation_paused']
+
+
+def test_activation_failure_repauses_gazebo(dashboard):
+    """A failed controller switch leaves the world paused and reports an error."""
+    node, _, _, simulation = dashboard
+    simulation['switch_success'] = False
+    assert request(node, 'POST', '/api/simulation/start', {})[0] == 409
+    assert simulation['world_requests'] == [False, True]
+    assert node.dashboard_state()['simulation_paused']

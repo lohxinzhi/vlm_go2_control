@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
@@ -103,12 +104,19 @@ def generate_launch_description():
                 'ground_height': ParameterValue(
                     LaunchConfiguration('ground_height'), value_type=float),
             }]),
-        # The spawner waits for controller_manager itself. Loading immediately
-        # avoids leaving the robot uncontrolled for a fixed 20 seconds.
+        # Configure both controllers while paused; activation needs Gazebo updates.
+        Node(
+            package='controller_manager', executable='spawner', output='screen',
+            arguments=['joint_states_controller', 'joint_group_effort_controller',
+                       '--inactive', '--controller-manager-timeout', '120'],
+            condition=IfCondition(LaunchConfiguration('paused')),
+            parameters=[clock]),
+        # Preserve the usual automatic activation for launches that run immediately.
         Node(
             package='controller_manager', executable='spawner', output='screen',
             arguments=['joint_states_controller', 'joint_group_effort_controller',
                        '--controller-manager-timeout', '120'],
+            condition=UnlessCondition(LaunchConfiguration('paused')),
             parameters=[clock]),
     ])
     return LaunchDescription(actions)

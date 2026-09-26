@@ -12,7 +12,8 @@ Open **http://127.0.0.1:8080** in a browser on the same machine. This launch sta
 the dialogue manager, action/service servers, dashboard, and
 `go2_house_world/top_down_camera_bridge.launch.py`, plus the Gazebo world-control
 bridge. When using `go2_sim_nav2_launch.py`, click **Start simulation** to resume
-physics and simulation time before navigating. The button then switches to
+physics and simulation time and activate the Go2 controllers before navigating.
+The button then switches to
 **Pause simulation** and **Resume simulation**. Pausing stops active dashboard
 velocity commands. The OpenAI key must be available
 to the dialogue and perception nodes as before.

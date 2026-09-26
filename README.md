@@ -79,9 +79,11 @@ source install/setup.bash
 ros2 launch vlm_go2_control go2_sim_nav2_launch.py
 ```
 
-Gazebo starts paused, so physics and `/clock` do not advance yet. Start the
-dashboard below and click **Start simulation** when ready. Then wait for the
-controllers and Nav2 to activate and use RViz's Nav2 Goal tool to navigate.
+Gazebo starts paused, so physics and `/clock` do not advance yet. The ROS
+controllers load and configure in the inactive state. Start the dashboard below
+and click **Start simulation** when ready. It queues controller activation,
+unpauses Gazebo, and waits for both controllers to become active. Then wait for
+Nav2 to activate and use RViz's Nav2 Goal tool to navigate.
 The default uses the included `maps/bto_1.yaml` with AMCL. Start
 online mapping with `slam:=true`; mapping continues while the robot moves.
 This launch does not perform autonomous frontier exploration.
@@ -114,7 +116,8 @@ for control details. Do not start both dashboard launch files together.
 Simulation and navigation options:
 
 - `gui:=true`: show the Gazebo GUI (off by default).
-- `paused:=false`: start Gazebo running immediately without the dashboard button.
+- `paused:=false`: start Gazebo running immediately and activate controllers
+  automatically, without the dashboard button.
 - `use_rviz:=false`: run without RViz.
 - `world:=/absolute/path/to/world.sdf`: select another world.
   Set `world_init_x`, `world_init_y`, `world_init_z`, and `world_init_heading`

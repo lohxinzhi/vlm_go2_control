@@ -8,8 +8,10 @@ import time
 import cv2
 import rclpy
 from ament_index_python.packages import get_package_share_directory
+from controller_manager_msgs.srv import ListControllers, SwitchController
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
+from rclpy.duration import Duration
 from rclpy.node import Node
 from ros_gz_interfaces.srv import ControlWorld
 from sensor_msgs.msg import Image
@@ -25,6 +27,7 @@ INACTIVE_ARROW_COLOR = (100, 140, 100)  # Muted green in OpenCV BGR order.
 ACTIVE_ARROW_COLOR = (0, 255, 0)
 VELOCITY_DEADBAND = 1e-3
 DETECTION_DISPLAY_SECONDS = 3.0
+REQUIRED_CONTROLLERS = ('joint_states_controller', 'joint_group_effort_controller')
 
 
 def draw_velocity_arrows(frame, command):
@@ -86,6 +89,10 @@ class RobotDashboard(Node):
         world_name = self.declare_parameter('world_name', 'greenquartz_bto').value
         self.world_control_client = self.create_client(
             ControlWorld, f'/world/{world_name}/control')
+        self.controller_list_client = self.create_client(
+            ListControllers, '/controller_manager/list_controllers')
+        self.controller_switch_client = self.create_client(
+            SwitchController, '/controller_manager/switch_controller')
 
         self.image_subscription = self.create_subscription(
             Image, self.image_topic, self.image_callback, qos_profile_sensor_data)
@@ -146,12 +153,87 @@ class RobotDashboard(Node):
         self.request_publisher.publish(String(data=text.strip()))
 
     def start_simulation(self):
-        """Resume Gazebo physics and its simulation clock."""
-        self.set_simulation_paused(False)
+        """Activate configured controllers as Gazebo starts updating."""
+        with self.control_lock:
+            if not self.simulation_paused:
+                return
+            if not self.world_control_client.wait_for_service(timeout_sec=1.0):
+                raise RuntimeError('Gazebo world control is not available yet.')
+            inactive = self.wait_for_configured_controllers()
+            switch_future = None
+            if inactive:
+                if not self.controller_switch_client.wait_for_service(timeout_sec=1.0):
+                    raise RuntimeError('Controller activation service is not available.')
+                switch_request = SwitchController.Request()
+                switch_request.activate_controllers = inactive
+                switch_request.strictness = SwitchController.Request.STRICT
+                switch_request.activate_asap = True
+                switch_request.timeout = Duration(seconds=10).to_msg()
+                # Queue activation before unpausing so the first Gazebo updates
+                # can switch on the leg effort controller.
+                switch_future = self.controller_switch_client.call_async(switch_request)
+            try:
+                self.request_world_control(False)
+                if switch_future is not None:
+                    response = self.wait_for_response(
+                        switch_future, 12.0, 'controller activation')
+                    if not response.ok:
+                        raise RuntimeError('Go2 controllers did not activate.')
+            except RuntimeError as error:
+                try:
+                    self.request_world_control(True)
+                except RuntimeError as pause_error:
+                    with self.state_lock:
+                        self.simulation_paused = False
+                        self.simulation_started = True
+                    message = f'{error} Gazebo could not be paused again: {pause_error}'
+                    raise RuntimeError(message) from pause_error
+                raise
+            with self.state_lock:
+                self.simulation_paused = False
+                self.simulation_started = True
 
     def pause_simulation(self):
         """Pause Gazebo physics and its simulation clock."""
         self.set_simulation_paused(True)
+
+    @staticmethod
+    def wait_for_response(future, timeout, operation):
+        """Wait from the HTTP thread while the ROS executor handles the reply."""
+        ready = Event()
+        future.add_done_callback(lambda _: ready.set())
+        if not ready.wait(timeout):
+            raise RuntimeError(f'Timed out waiting for {operation}. Try again.')
+        try:
+            return future.result()
+        except Exception as error:
+            raise RuntimeError(f'{operation} failed.') from error
+
+    def wait_for_configured_controllers(self):
+        """Wait for the paused-world spawner to configure both controllers."""
+        deadline = time.monotonic() + 15.0
+        while time.monotonic() < deadline:
+            if self.controller_list_client.wait_for_service(timeout_sec=1.0):
+                response = self.wait_for_response(
+                    self.controller_list_client.call_async(ListControllers.Request()),
+                    2.0, 'controller list')
+                states = {controller.name: controller.state
+                          for controller in response.controller}
+                if all(states.get(name) in ('inactive', 'active')
+                       for name in REQUIRED_CONTROLLERS):
+                    return [name for name in REQUIRED_CONTROLLERS
+                            if states[name] == 'inactive']
+            time.sleep(0.2)
+        raise RuntimeError('Go2 controllers were not configured. Check the spawner log.')
+
+    def request_world_control(self, paused):
+        """Send a Gazebo pause command and verify its reply."""
+        request = ControlWorld.Request()
+        request.world_control.pause = paused
+        response = self.wait_for_response(
+            self.world_control_client.call_async(request), 10.0, 'Gazebo world control')
+        if response is None or not response.success:
+            raise RuntimeError('Gazebo did not change the simulation state.')
 
     def set_simulation_paused(self, paused):
         """Send a world-control request and update state only when it succeeds."""
@@ -166,23 +248,9 @@ class RobotDashboard(Node):
                     self.simulation_pausing = True
                 self.stop_teleop()
             try:
-                request = ControlWorld.Request()
-                request.world_control.pause = paused
-                ready = Event()
-                future = self.world_control_client.call_async(request)
-                future.add_done_callback(lambda _: ready.set())
-                if not ready.wait(10.0):
-                    raise RuntimeError('Timed out waiting for Gazebo. Try again.')
-                try:
-                    response = future.result()
-                except Exception as error:
-                    raise RuntimeError('Gazebo world control failed.') from error
-                if response is None or not response.success:
-                    raise RuntimeError('Gazebo did not change the simulation state.')
+                self.request_world_control(paused)
                 with self.state_lock:
                     self.simulation_paused = paused
-                    if not paused:
-                        self.simulation_started = True
             finally:
                 if paused:
                     with self.state_lock:

@@ -51,7 +51,8 @@ let simulationStarted=false,simulationPaused=true,simulationReady=false;
 function error(text){$('error').textContent=text;}
 async function post(path,data){
   if(path==='/api/teleop')data={...data,client_id:clientId,sequence:++sequence};
-  const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Control-Token':token},body:JSON.stringify(data),signal:AbortSignal.timeout(12000)});
+  const timeout=path==='/api/simulation/start'?35000:12000;
+  const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Control-Token':token},body:JSON.stringify(data),signal:AbortSignal.timeout(timeout)});
   const body=await response.json(); if(!response.ok)throw new Error(body.error||'Request failed.'); return body;
 }
 function updateDriveButtons(){document.querySelectorAll('.pad button').forEach(b=>b.disabled=!manual||simulationPaused);}
