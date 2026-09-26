@@ -184,7 +184,8 @@ class ApproachObjectServer(Node):
                 {'type': 'text', 'text': question},
                 {'type': 'image_url', 'image_url': {
                     'url': f'data:image/jpeg;base64,{image_data}',
-                    'detail': 'low'}},
+                    # 'detail': 'low'
+                    }},
             ]}])
         answer = response.choices[0].message.content
         return json.loads(answer[answer.find('{'):answer.rfind('}') + 1])
@@ -251,7 +252,7 @@ class ApproachObjectServer(Node):
                     goal_handle.succeed()
                     return result
                 command = Twist()
-                command.angular.z = -0.1 * error
+                command.angular.z = -0.25 * error
                 command.linear.x = 0.5 if abs(error) < 0.25 else 0.0
                 filtered_command = self.apply_low_pass_filter(command)
                 self.velocity_publisher.publish(filtered_command)

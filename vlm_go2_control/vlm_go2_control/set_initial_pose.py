@@ -26,8 +26,9 @@ class SetInitialPose(Node):
 
     def publish_once(self):
         if self.published:
+            self.destroy_timer(self.timer)
             return
-        if time.monotonic() - self.start_time < 1.0:
+        if time.monotonic() - self.start_time < 3.0:
             return
 
         x = float(self.get_parameter('x').value)
