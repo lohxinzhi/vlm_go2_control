@@ -6,14 +6,19 @@
   <maintainer email="user@localhost.local">Workspace user</maintainer>
   <license>Proprietary</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>gz_sim_vendor</build_depend>
+  <build_depend>gz_rendering_vendor</build_depend>
+  <build_depend>gz_plugin_vendor</build_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>python3-pytest</test_depend>
   <export>
     <build_type>ament_cmake</build_type>
     <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros plugin_path="${prefix}/plugins"/>
   </export>
 </package>

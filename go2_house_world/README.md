@@ -1,5 +1,26 @@
 # Shared apartment simulation
 
+## Overhead camera
+
+The world includes a fixed, top-down orthographic camera covering 36 m by
+24 m. Its Gazebo image topic is `/top_down/image`; the one-way ROS bridge
+publishes `sensor_msgs/msg/Image` on `/top_down/image_raw` at 5 Hz.
+
+To start the world and bridge together:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
+ros2 launch go2_house_world greenquartz_bto_camera.launch.py
+```
+
+When another launch already starts this world and the Go2, start only the
+camera bridge in a second terminal:
+
+```bash
+ros2 launch go2_house_world top_down_camera_bridge.launch.py
+```
+
 GreenQuartz is the intended shared project world. This package contains the
 apartment mesh, pale oak floor texture, 249 simplified collision boxes, and
 five static coloured targets. Runtime assets are preserved from the working

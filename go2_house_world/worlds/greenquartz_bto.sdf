@@ -13,6 +13,12 @@
     <plugin name='gz::sim::systems::Sensors' filename='gz-sim-sensors-system'>
       <render_engine>ogre2</render_engine>
     </plugin>
+    <plugin name='go2_house_world::OrthographicCameraSystem'
+            filename='liborthographic_camera_system.so'>
+      <sensor_name>top_down_camera</sensor_name>
+      <view_width>36</view_width>
+      <view_height>24</view_height>
+    </plugin>
 
     <plugin filename="gz-sim-navsat-system" name="gz::sim::systems::NavSat">
     </plugin>    
@@ -123,6 +129,31 @@
             </mesh>
           </geometry>
         </collision>
+      </link>
+    </model>
+
+    <model name='top_down_camera'>
+      <static>true</static>
+      <!-- The camera looks straight down and covers the 30 m by 20 m apartment. -->
+      <pose>14.8 5.8 16 0 1.570796 1.570796</pose>
+      <link name='camera_link'>
+        <sensor name='top_down_camera' type='camera'>
+          <always_on>true</always_on>
+          <update_rate>5</update_rate>
+          <topic>/top_down/image</topic>
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>1200</width>
+              <height>800</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>100</far>
+            </clip>
+          </camera>
+        </sensor>
       </link>
     </model>
 
