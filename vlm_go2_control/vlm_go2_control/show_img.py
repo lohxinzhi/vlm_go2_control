@@ -1,14 +1,44 @@
 import cv2
 import rclpy
 from cv_bridge import CvBridge, CvBridgeError
+from geometry_msgs.msg import Twist
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float32
 from vision_msgs.msg import Detection2D
 
 
+INACTIVE_ARROW_COLOR = (100, 140, 100)  # Muted green in OpenCV BGR order.
+ACTIVE_ARROW_COLOR = (0, 255, 0)
+VELOCITY_DEADBAND = 1e-3
+
+
+def draw_velocity_arrows(frame, command):
+    """Draw command direction arrows along the four image edges."""
+    height, width = frame.shape[:2]
+    scale = min(width, height)
+    margin = max(6, round(scale * 0.04))
+    length = max(18, round(scale * 0.13))
+    thickness = max(3, round(scale * 0.015))
+    center_x, center_y = width // 2, height // 2
+    arrows = (
+        ((center_x, margin + length), (center_x, margin),
+         command.linear.x > VELOCITY_DEADBAND),
+        ((center_x, height - margin - length), (center_x, height - margin),
+         command.linear.x < -VELOCITY_DEADBAND),
+        ((margin + length, center_y), (margin, center_y),
+         command.angular.z > VELOCITY_DEADBAND),
+        ((width - margin - length, center_y), (width - margin, center_y),
+         command.angular.z < -VELOCITY_DEADBAND),
+    )
+    for start, tip, active in arrows:
+        color = ACTIVE_ARROW_COLOR if active else INACTIVE_ARROW_COLOR
+        cv2.arrowedLine(frame, start, tip, color, thickness,
+                        line_type=cv2.LINE_AA, tipLength=0.45)
+
+
 class ImageAndBoundingBoxViewer(Node):
-    """Display camera images with vision_msgs detection boxes overlaid."""
+    """Display camera images with detection boxes and velocity arrows."""
 
     def __init__(self):
         super().__init__('image_and_bounding_box_viewer')
@@ -34,9 +64,11 @@ class ImageAndBoundingBoxViewer(Node):
             self.front_distance_callback,
             10,
         )
+        self.create_subscription(Twist, '/cmd_vel', self.velocity_callback, 10)
 
         self.latest_detection = None
         self.front_distance = None
+        self.latest_velocity = Twist()
         self.get_logger().info(
             f'Subscribing to {self.image_topic} and '
             f'{self.bounding_box_topic}')
@@ -49,6 +81,10 @@ class ImageAndBoundingBoxViewer(Node):
         """Store the latest forward distance in meters."""
         self.front_distance = message.data
 
+    def velocity_callback(self, message: Twist):
+        """Store the latest command for the next displayed frame."""
+        self.latest_velocity = message
+
     def image_callback(self, message: Image):
         """Convert and display an image with the newest detection boxes."""
         try:
@@ -59,6 +95,7 @@ class ImageAndBoundingBoxViewer(Node):
 
         if self.latest_detection is not None:
             self.draw_detection(frame, self.latest_detection)
+        draw_velocity_arrows(frame, self.latest_velocity)
 
         cv2.imshow(self.window_name, frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
