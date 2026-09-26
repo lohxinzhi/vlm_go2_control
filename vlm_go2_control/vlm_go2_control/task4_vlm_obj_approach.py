@@ -19,6 +19,7 @@ from rclpy.action import ActionClient
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
 from vlm_go2_interfaces.action import ApproachObject, GoToRoom
+from vlm_go2_interfaces.srv import DescribeScene
 
 
 class Camera(Node):
@@ -88,6 +89,7 @@ class VLMDialogue(Node):
             'in order. Allowed actions: '
             '{"action": "goto_room", "room": <integer>}, '
             '{"action": "goto_room_name", "room_name": "<room name>"}, '
+            '{"action": "describe"}, '
             '{"action": "approach", "object": "<object name>"}, '
             '{"action": "stop"}, '
             '{"action": "chat", "reply": "<answer or clarification>"}. '
@@ -104,6 +106,8 @@ class VLMDialogue(Node):
             self, ApproachObject, '/approach_object', callback_group=group)
         self.stop_client = self.create_client(
             Trigger, '/stop_approach', callback_group=group)
+        self.describe_client = self.create_client(
+            DescribeScene, '/describe_scene', callback_group=group)
         self.actions_publisher = self.create_publisher(String, '/vlm/actions', 10)
         self.request_lock = Lock()
         self.create_subscription(
@@ -158,6 +162,15 @@ class VLMDialogue(Node):
             print(f'Robot: Approaching the {object_name}.', flush=True)
             success, message = self.send_action(self.approach_client, goal)
             return message, success
+        if action == 'describe':
+            if not self.describe_client.wait_for_service(timeout_sec=5.0):
+                return 'Scene description service unavailable.', False
+            response = wait_for_future(
+                self.describe_client.call_async(DescribeScene.Request()))
+            if response is None:
+                return 'Scene description did not return a response.', False
+            return (response.description if response.success else response.message,
+                    response.success)
         if action == 'stop':
             if not self.stop_client.wait_for_service(timeout_sec=5.0):
                 return 'Stop service unavailable.', False

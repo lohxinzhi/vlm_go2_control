@@ -43,6 +43,7 @@ setup(
             'task4_vlm_obj_approach = vlm_go2_control.task4_vlm_obj_approach:main',
             'goto_room_server = vlm_go2_control.goto_room_server:main',
             'approach_object_server = vlm_go2_control.approach_object_server:main',
+            'describe_scene_server = vlm_go2_control.describe_scene_server:main',
             'show_img = vlm_go2_control.show_img:main',
         ],
     },
