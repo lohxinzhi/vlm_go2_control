@@ -4,6 +4,9 @@ import base64
 import json
 import math
 import os
+from datetime import datetime
+from pathlib import Path
+import re
 import time
 from threading import Event, Lock
 
@@ -26,8 +29,10 @@ from vlm_go2_control.vlm_dialogue_manager import Camera
 
 SEARCH_SPEED = 0.3  # radians per second, counterclockwise
 SEARCH_STEP = math.radians(30.0)
+SEARCH_STEP = math.radians(10.0)
 # Leave room for stopping after the final command so the turn stays under 360 degrees.
 MAX_SEARCH_ROTATION = 2.0 * math.pi - math.radians(15.0)
+IMAGE_DIR = Path(__file__).resolve().parent.parent / 'image'
 
 
 class ApproachObjectServer(Node):
@@ -205,7 +210,64 @@ class ApproachObjectServer(Node):
                     }},
             ]}])
         answer = response.choices[0].message.content
-        return json.loads(answer[answer.find('{'):answer.rfind('}') + 1])
+        grounding = json.loads(answer[answer.find('{'):answer.rfind('}') + 1])
+        coordinates = grounding.get('bbox', [])
+        if grounding.get('found') and len(coordinates) == 4:
+            bbox = tuple(map(float, coordinates))
+            if self.client_type == 'qwen':
+                height, width = frame.shape[:2]
+                bbox = (
+                    bbox[0] * width / 1000, bbox[1] * height / 1000,
+                    bbox[2] * width / 1000, bbox[3] * height / 1000)
+            grounding['bbox'] = list(bbox)
+            self.save_detection_image(frame, object_name, bbox)
+        return grounding
+
+    def save_detection_image(self, frame, object_name, bbox):
+        """Save a JPEG of a found object with its pixel bbox annotated."""
+        x1, y1, x2, y2 = (int(round(value)) for value in bbox)
+        height, width = frame.shape[:2]
+        x1 = min(max(x1, 0), width - 1)
+        x2 = min(max(x2, 0), width - 1)
+        y1 = min(max(y1, 0), height - 1)
+        y2 = min(max(y2, 0), height - 1)
+        annotated = frame.copy()
+        color = (0, 255, 0)
+        cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+        cv2.putText(
+            annotated, object_name, (x1, max(20, y1 - 10)),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+        cv2.putText(
+            annotated, f'x1,y1=({x1},{y1})', (x1, min(height - 5, y1 + 20)),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1)
+        cv2.putText(
+            annotated, f'x2,y2=({x2},{y2})', (x2, max(15, y2 - 8)),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1)
+        model_label = f'Model: {self.vlm_model}'
+        (text_width, text_height), baseline = cv2.getTextSize(
+            model_label, cv2.FONT_HERSHEY_SIMPLEX, 0.55, 2)
+        label_origin = (
+            max(0, width - text_width - 8),
+            max(text_height + baseline, height - 8))
+        cv2.putText(
+            annotated, model_label, label_origin, cv2.FONT_HERSHEY_SIMPLEX,
+            0.55, color, 2)
+        safe_object_name = re.sub(
+            r'[^A-Za-z0-9_-]+', '_', object_name.strip()).strip('_') or 'object'
+        safe_model_name = re.sub(
+            r'[^A-Za-z0-9_-]+', '_', self.vlm_model.strip()).strip('_') or 'model'
+        filename = (
+            f'{datetime.now().strftime("%Y%m%d_%H%M%S_%f")}_'
+            f'{safe_object_name}_{safe_model_name}.jpg')
+        image_path = IMAGE_DIR / filename
+        try:
+            IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+            saved = cv2.imwrite(str(image_path), annotated)
+        except (OSError, cv2.error) as error:
+            self.get_logger().warning(f'Could not save detection image: {error}')
+            return
+        if not saved:
+            self.get_logger().warning(f'Could not save detection image: {image_path}')
 
     def publish_bbox(self, coordinates):
         x1, y1, x2, y2 = coordinates
@@ -260,10 +322,6 @@ class ApproachObjectServer(Node):
                 if len(coordinates) != 4:
                     raise ValueError('VLM returned an invalid bounding box')
                 x1, y1, x2, y2 = map(float, coordinates)
-                if self.client_type == 'qwen':
-                    height, width = frame.shape[:2]
-                    x1, x2 = x1 * width / 1000, x2 * width / 1000
-                    y1, y2 = y1 * height / 1000, y2 * height / 1000
                 self.publish_bbox((x1, y1, x2, y2))
                 width = frame.shape[1]
                 error = ((x1 + x2) / 2.0 - width / 2.0) / (width / 2.0)
@@ -273,7 +331,7 @@ class ApproachObjectServer(Node):
                     goal_handle.succeed()
                     return result
                 command = Twist()
-                command.angular.z = -0.25 * error
+                command.angular.z = -0.15 * error
                 command.linear.x = 0.5 if abs(error) < 0.25 else 0.0
                 filtered_command = self.apply_low_pass_filter(command)
                 self.velocity_publisher.publish(filtered_command)

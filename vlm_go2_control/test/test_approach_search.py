@@ -1,6 +1,7 @@
 """Tests for the bounded object search in the approach action server."""
 
 import math
+import json
 import time
 from threading import Event, Lock
 from types import SimpleNamespace
@@ -108,8 +109,8 @@ def test_search_detection_continues_approach():
     assert finished == ['succeeded']
 
 
-def test_qwen_normalized_bbox_is_converted_to_pixels():
-    """Qwen coordinates scale against width and height independently."""
+def test_qwen_pixel_bbox_approaches_object():
+    """The approach loop consumes the pixel bbox returned by ask_vlm."""
     frame = np.zeros((100, 200, 3), dtype=np.uint8)
     published = []
     goal = SimpleNamespace(
@@ -123,7 +124,7 @@ def test_qwen_normalized_bbox_is_converted_to_pixels():
         filtered_cmd=Twist(),
         velocity_publisher=SimpleNamespace(publish=lambda _command: None),
         ask_vlm=lambda _name, _frame: {
-            'found': True, 'bbox': [400, 400, 600, 600]},
+            'found': True, 'bbox': [80, 40, 120, 60]},
         publish_bbox=published.append,
         goal_lock=Lock(),
         busy=True,
@@ -133,3 +134,44 @@ def test_qwen_normalized_bbox_is_converted_to_pixels():
 
     assert result.success
     assert published == [(80.0, 40.0, 120.0, 60.0)]
+
+
+def test_qwen_detection_saves_annotated_jpeg_only_when_found(
+        monkeypatch, tmp_path):
+    """Successful detections save pixel-scaled boxes as timestamped JPEGs."""
+    frame = np.zeros((100, 200, 3), dtype=np.uint8)
+    labels = []
+    original_put_text = approach_object_server.cv2.putText
+
+    def capture_label(image, text, *args, **kwargs):
+        labels.append(text)
+        return original_put_text(image, text, *args, **kwargs)
+
+    monkeypatch.setattr(approach_object_server.cv2, 'putText', capture_label)
+    responses = iter((
+        {'found': True, 'bbox': [400, 400, 600, 600]},
+        {'found': False, 'bbox': []},
+    ))
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
+        create=lambda **_: SimpleNamespace(choices=[SimpleNamespace(
+            message=SimpleNamespace(content=json.dumps(next(responses))))]))))
+    server = SimpleNamespace(
+        client_type='qwen', client=client, vlm_model='test')
+    server.save_detection_image = lambda image, name, bbox: (
+        approach_object_server.ApproachObjectServer.save_detection_image(
+            server, image, name, bbox))
+    monkeypatch.setattr(approach_object_server, 'IMAGE_DIR', tmp_path / 'image')
+
+    found = approach_object_server.ApproachObjectServer.ask_vlm(
+        server, 'red cube', frame)
+    not_found = approach_object_server.ApproachObjectServer.ask_vlm(
+        server, 'red cube', frame)
+
+    saved_images = list((tmp_path / 'image').glob('*.jpg'))
+    assert found['bbox'] == [80.0, 40.0, 120.0, 60.0]
+    assert not_found['found'] is False
+    assert len(saved_images) == 1
+    assert 'red_cube' in saved_images[0].name
+    assert 'test' in saved_images[0].name
+    assert 'Model: test' in labels
+    assert approach_object_server.cv2.imread(str(saved_images[0])) is not None
