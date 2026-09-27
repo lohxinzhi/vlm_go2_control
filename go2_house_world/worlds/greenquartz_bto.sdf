@@ -182,6 +182,191 @@
       <name>target_purple_cylinder_kitchen</name>
       <pose>9.4 -1.0 0.71 0 0 0</pose>
     </include>
+
+    <model name='living_room_table'>
+      <pose>6.5 7.2 0 0 0 0</pose>
+      <static>true</static>
+      <link name='table_link'>
+        <collision name='top_collision'>
+          <pose>0 0 0.76 0 0 0</pose>
+          <geometry><box><size>1.4 0.8 0.08</size></box></geometry>
+        </collision>
+        <visual name='top_visual'>
+          <pose>0 0 0.76 0 0 0</pose>
+          <geometry><box><size>1.4 0.8 0.08</size></box></geometry>
+          <material><ambient>0.5 0.29 0.14 1</ambient><diffuse>0.5 0.29 0.14 1</diffuse></material>
+        </visual>
+        <collision name='front_left_leg_collision'>
+          <pose>-0.62 -0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+        </collision>
+        <visual name='front_left_leg_visual'>
+          <pose>-0.62 -0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+        <collision name='front_right_leg_collision'>
+          <pose>0.62 -0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+        </collision>
+        <visual name='front_right_leg_visual'>
+          <pose>0.62 -0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+        <collision name='rear_left_leg_collision'>
+          <pose>-0.62 0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+        </collision>
+        <visual name='rear_left_leg_visual'>
+          <pose>-0.62 0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+        <collision name='rear_right_leg_collision'>
+          <pose>0.62 0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+        </collision>
+        <visual name='rear_right_leg_visual'>
+          <pose>0.62 0.32 0.36 0 0 0</pose>
+          <geometry><box><size>0.08 0.08 0.72</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='living_room_chair'>
+      <pose>6.5 6.2 0 0 0 0</pose>
+      <static>true</static>
+      <link name='chair_link'>
+        <collision name='seat_collision'>
+          <pose>0 0 0.45 0 0 0</pose>
+          <geometry><box><size>0.5 0.5 0.08</size></box></geometry>
+        </collision>
+        <visual name='seat_visual'>
+          <pose>0 0 0.45 0 0 0</pose>
+          <geometry><box><size>0.5 0.5 0.08</size></box></geometry>
+          <material><ambient>0.17 0.34 0.55 1</ambient><diffuse>0.17 0.34 0.55 1</diffuse></material>
+        </visual>
+        <collision name='back_collision'>
+          <pose>0 -0.22 0.765 0 0 0</pose>
+          <geometry><box><size>0.5 0.06 0.55</size></box></geometry>
+        </collision>
+        <visual name='back_visual'>
+          <pose>0 -0.22 0.765 0 0 0</pose>
+          <geometry><box><size>0.5 0.06 0.55</size></box></geometry>
+          <material><ambient>0.17 0.34 0.55 1</ambient><diffuse>0.17 0.34 0.55 1</diffuse></material>
+        </visual>
+        <collision name='front_left_leg_collision'>
+          <pose>-0.21 0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+        </collision>
+        <visual name='front_left_leg_visual'>
+          <pose>-0.21 0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+        <collision name='front_right_leg_collision'>
+          <pose>0.21 0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+        </collision>
+        <visual name='front_right_leg_visual'>
+          <pose>0.21 0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+        <collision name='rear_left_leg_collision'>
+          <pose>-0.21 -0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+        </collision>
+        <visual name='rear_left_leg_visual'>
+          <pose>-0.21 -0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+        <collision name='rear_right_leg_collision'>
+          <pose>0.21 -0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+        </collision>
+        <visual name='rear_right_leg_visual'>
+          <pose>0.21 -0.21 0.205 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.41</size></box></geometry>
+          <material><ambient>0.4 0.22 0.1 1</ambient><diffuse>0.4 0.22 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='living_room_teddy_bear'>
+      <pose>8.3 7.2 0 0 0 0</pose>
+      <static>true</static>
+      <link name='teddy_bear_link'>
+        <collision name='bear_collision'>
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry><cylinder><radius>0.35</radius><length>1</length></cylinder></geometry>
+        </collision>
+        <visual name='body'>
+          <pose>0 0 0.43 0 0 0</pose>
+          <geometry><sphere><radius>0.26</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='head'>
+          <pose>0 0 0.75 0 0 0</pose>
+          <geometry><sphere><radius>0.21</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='left_ear'>
+          <pose>-0.16 0 0.93 0 0 0</pose>
+          <geometry><sphere><radius>0.07</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='right_ear'>
+          <pose>0.16 0 0.93 0 0 0</pose>
+          <geometry><sphere><radius>0.07</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='left_arm'>
+          <pose>-0.24 0 0.48 0 0 0</pose>
+          <geometry><sphere><radius>0.1</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='right_arm'>
+          <pose>0.24 0 0.48 0 0 0</pose>
+          <geometry><sphere><radius>0.1</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='left_foot'>
+          <pose>-0.14 -0.04 0.11 0 0 0</pose>
+          <geometry><sphere><radius>0.11</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='right_foot'>
+          <pose>0.14 -0.04 0.11 0 0 0</pose>
+          <geometry><sphere><radius>0.11</radius></sphere></geometry>
+          <material><ambient>0.5 0.27 0.13 1</ambient><diffuse>0.5 0.27 0.13 1</diffuse></material>
+        </visual>
+        <visual name='muzzle'>
+          <pose>0 -0.18 0.72 0 0 0</pose>
+          <geometry><sphere><radius>0.09</radius></sphere></geometry>
+          <material><ambient>0.78 0.59 0.4 1</ambient><diffuse>0.78 0.59 0.4 1</diffuse></material>
+        </visual>
+        <visual name='nose'>
+          <pose>0 -0.26 0.73 0 0 0</pose>
+          <geometry><sphere><radius>0.03</radius></sphere></geometry>
+          <material><ambient>0.06 0.04 0.03 1</ambient><diffuse>0.06 0.04 0.03 1</diffuse></material>
+        </visual>
+        <visual name='left_eye'>
+          <pose>-0.08 -0.19 0.81 0 0 0</pose>
+          <geometry><sphere><radius>0.025</radius></sphere></geometry>
+          <material><ambient>0.06 0.04 0.03 1</ambient><diffuse>0.06 0.04 0.03 1</diffuse></material>
+        </visual>
+        <visual name='right_eye'>
+          <pose>0.08 -0.19 0.81 0 0 0</pose>
+          <geometry><sphere><radius>0.025</radius></sphere></geometry>
+          <material><ambient>0.06 0.04 0.03 1</ambient><diffuse>0.06 0.04 0.03 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
     <model name='cylinder'>
       <pose>3.654 12.587 0.5 0 0 0</pose>
       <static>true</static>
