@@ -260,6 +260,10 @@ class ApproachObjectServer(Node):
                 if len(coordinates) != 4:
                     raise ValueError('VLM returned an invalid bounding box')
                 x1, y1, x2, y2 = map(float, coordinates)
+                if self.client_type == 'qwen':
+                    height, width = frame.shape[:2]
+                    x1, x2 = x1 * width / 1000, x2 * width / 1000
+                    y1, y2 = y1 * height / 1000, y2 * height / 1000
                 self.publish_bbox((x1, y1, x2, y2))
                 width = frame.shape[1]
                 error = ((x1 + x2) / 2.0 - width / 2.0) / (width / 2.0)

@@ -87,6 +87,7 @@ def test_search_detection_continues_approach():
         is_cancel_requested=False,
         succeed=lambda: finished.append('succeeded'))
     server = SimpleNamespace(
+        client_type='openai',
         stop_requested=Event(),
         camera=SimpleNamespace(frame=frame, front_distance=1.5),
         filtered_cmd=Twist(),
@@ -105,3 +106,30 @@ def test_search_detection_continues_approach():
     assert result.success
     assert 'next to the cube' in result.message
     assert finished == ['succeeded']
+
+
+def test_qwen_normalized_bbox_is_converted_to_pixels():
+    """Qwen coordinates scale against width and height independently."""
+    frame = np.zeros((100, 200, 3), dtype=np.uint8)
+    published = []
+    goal = SimpleNamespace(
+        request=SimpleNamespace(object_name='cube'),
+        is_cancel_requested=False,
+        succeed=lambda: None)
+    server = SimpleNamespace(
+        client_type='qwen',
+        stop_requested=Event(),
+        camera=SimpleNamespace(frame=frame, front_distance=1.5),
+        filtered_cmd=Twist(),
+        velocity_publisher=SimpleNamespace(publish=lambda _command: None),
+        ask_vlm=lambda _name, _frame: {
+            'found': True, 'bbox': [400, 400, 600, 600]},
+        publish_bbox=published.append,
+        goal_lock=Lock(),
+        busy=True,
+    )
+
+    result = approach_object_server.ApproachObjectServer.execute(server, goal)
+
+    assert result.success
+    assert published == [(80.0, 40.0, 120.0, 60.0)]
