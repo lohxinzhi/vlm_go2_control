@@ -21,6 +21,7 @@ import rclpy
 from rclpy.action import ActionClient
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
+from tf2_ros import Buffer, TransformException, TransformListener
 from vlm_go2_interfaces.action import ApproachObject, GoToRoom
 from vlm_go2_interfaces.srv import DescribeScene
 
@@ -86,6 +87,7 @@ class VLMDialogueManager(Node):
             self.rooms = yaml.safe_load(room_file)['rooms']
         room_names = ', '.join(room['name'] for room in self.rooms.values())
         room_ids = ', '.join(str(room_id) for room_id in self.rooms)
+        room_bbox = ', '.join(str(room['region']) for room in self.rooms.values())
         system = (
             'You are the dialogue manager of an indoor Unitree Go2 robot. '
             'Convert each user request into exactly one JSON object, no other text. '
@@ -106,7 +108,8 @@ class VLMDialogueManager(Node):
             'questions from memory with chat. '
             'Use a separate approach action for each object. Stop ends the sequence. '
             'For an impossible or unsafe request, use chat to explain. '
-            f'Valid room names: {room_names}. Valid room ids: {room_ids}.')
+            f'Valid room names: {room_names}. Valid room ids: {room_ids}.'
+            f'Each room bounding box in cooridinates in meters are:{room_bbox}, (x1,y1) is the top left and (x2,y2) is bottom right from map origin')
         self.history = [{'role': 'system', 'content': system}]
         client_type = self.declare_parameter(
             'client_type', 'openai').value.lower()
@@ -142,6 +145,10 @@ class VLMDialogueManager(Node):
         self.active_plan = None
         self.active_goal = None
         self.manual_control = False
+        self.current_position = (None, None)
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+        self.create_timer(0.1, self.update_position, callback_group=group)
         self.create_service(
             SetBool, '/vlm/manual_control', self.set_manual_control,
             callback_group=group)
@@ -153,6 +160,15 @@ class VLMDialogueManager(Node):
             'use_console_input', sys.stdin.isatty()).value
         if use_console:
             Thread(target=self.console_worker, daemon=True).start()
+
+    def update_position(self):
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                'map', 'base_footprint', rclpy.time.Time())
+        except TransformException:
+            return
+        position = transform.transform.translation
+        self.current_position = (position.x, position.y)
 
     def room_id_from_name(self, room_name):
         normalized = ' '.join(room_name.split()).casefold()
@@ -326,8 +342,11 @@ class VLMDialogueManager(Node):
         self.report_reply(' '.join(replies))
 
     def run_request(self, user):
+        curr_pos = self.current_position
         with self.history_lock:
             self.history.append({'role': 'user', 'content': user})
+            self.history.append({'role': 'user', 'content': f"current robot position is {curr_pos[0]:.3f}, {curr_pos[1]:.3f} "})
+
             messages = list(self.history)
         try:
             output = self.client.chat.completions.create(

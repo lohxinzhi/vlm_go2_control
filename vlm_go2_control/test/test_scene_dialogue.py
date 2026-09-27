@@ -8,6 +8,21 @@ from concurrent.futures import Future
 from vlm_go2_control import vlm_dialogue_manager
 
 
+def test_position_comes_from_map_to_base_footprint_transform():
+    """The prompt position is taken from the base footprint in map coordinates."""
+    lookups = []
+    transform = SimpleNamespace(transform=SimpleNamespace(
+        translation=SimpleNamespace(x=2.5, y=-1.25)))
+    dialogue = SimpleNamespace(tf_buffer=SimpleNamespace(
+        lookup_transform=lambda target, source, stamp: (
+            lookups.append((target, source)) or transform)))
+
+    vlm_dialogue_manager.VLMDialogueManager.update_position(dialogue)
+
+    assert lookups == [('map', 'base_footprint')]
+    assert dialogue.current_position == (2.5, -1.25)
+
+
 def test_visual_question_is_forwarded_to_service(monkeypatch):
     """The dialogue manager sends the VQA mode and original question."""
     requests = []
@@ -49,6 +64,7 @@ def test_new_motion_plan_cancels_previous_plan(monkeypatch):
             start=lambda: pending.append((target, args))))
     dialogue = SimpleNamespace(
         history=[], history_lock=Lock(), plan_lock=Lock(),
+        current_position=(None, None),
         active_plan=None, manual_control=False, rooms={1: {'name': 'Kitchen'}},
         client=SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
             create=lambda **_: SimpleNamespace(choices=[SimpleNamespace(
@@ -84,6 +100,7 @@ def test_describe_and_invalid_plan_leave_motion_running(monkeypatch):
     replies = []
     dialogue = SimpleNamespace(
         history=[], history_lock=Lock(), plan_lock=Lock(),
+        current_position=(None, None),
         active_plan=active_plan,
         client=SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
             create=lambda **_: SimpleNamespace(choices=[SimpleNamespace(
